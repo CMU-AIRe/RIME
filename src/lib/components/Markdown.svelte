@@ -1457,6 +1457,19 @@
   :global(.md-output strong) {
     @apply font-semibold;
   }
+  /* Highlighted (bold) text in running prose is coloured, like the ::blue[]:: highlights
+     of the reference post (Notion blue). Captions, coloured spans, tables, headings and
+     short run-in labels (<strong class="md-runin">, added by scripts/notion/postprocess.py)
+     keep the normal ink colour. */
+  :global(.md-output p strong),
+  :global(.md-output li strong) {
+    color: var(--md-highlight, #0b6e99);
+  }
+  :global(.md-output .md-figcaption strong),
+  :global(.md-output span[style*="color"] strong),
+  :global(.md-output strong.md-runin) {
+    color: inherit;
+  }
   :global(.md-output em) {
     @apply italic;
   }
@@ -1502,6 +1515,17 @@
   :global(.md-output tbody tr:nth-child(even)) {
     @apply bg-neutral-50/50;
   }
+  /* Notion row background colours, for raw HTML tables written as <tr class="nbg-…">
+     (scripts/notion/postprocess.py). Painted on the cells so they win over the zebra rows. */
+  :global(.md-output tr.nbg-gray > *) { background: #f1f1ef; }
+  :global(.md-output tr.nbg-brown > *) { background: #f4eeee; }
+  :global(.md-output tr.nbg-orange > *) { background: #fbecdd; }
+  :global(.md-output tr.nbg-yellow > *) { background: #fbf3db; }
+  :global(.md-output tr.nbg-green > *) { background: #edf3ec; }
+  :global(.md-output tr.nbg-blue > *) { background: #e7f3f8; }
+  :global(.md-output tr.nbg-purple > *) { background: #f4f0f7; }
+  :global(.md-output tr.nbg-pink > *) { background: #f9eef3; }
+  :global(.md-output tr.nbg-red > *) { background: #fdebec; }
 
   :global(.math-block) {
     @apply my-4 text-center;
