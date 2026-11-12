@@ -108,6 +108,8 @@ Third, the stream of tasks must create both an opportunity and a need to use mem
 
 ## Experiments
 
+### Setup
+
 :::callout_begin type="note" title=" ":::
 <strong class="md-runin">Setup at a glance.</strong>
 
@@ -338,3 +340,20 @@ So far we have trained a single model to operate in both the actor and writer ro
 <iframe src="case-studies/case_exploration.html" data-autoheight loading="lazy" style="width:100%;height:720px;border:1px solid #e5e5e5;border-radius:6px"></iframe>
 
 [Open this case study in a new tab](case-studies/case_exploration.html)
+
+## Acknowledgements
+
+We thank Anikait Singh, Apurva Gandhi, Violet Xiang and Hao Bai for helpful discussions and feedback on an earlier version of this post. We thank the CMU FLAME center for providing the GPU resources that supported this work.
+
+## Citation
+
+Please cite this post as:
+
+```bibtex
+@misc{Xu2026rime,
+  author={Xu, Qixin and Qu, Yuxiao and Wu, Ian and Kumar, Aviral},
+  title={How to Train Memory Writing for Continual Learning},
+  howpublished={\url{https://cmu-aire.github.io/RIME/}},
+  year={2026},
+}
+```
