@@ -2,7 +2,6 @@
 # - A plain line is a passage exactly as it is bolded in Notion (the text between the ** or *** markers).
 # - "[section] <start of an H2 title>" keeps every bold sentence that opens a paragraph in that section black.
 # Lines starting with # are ignored.
-useful memories require informative experience.
 order training tasks from easy to medium to hard
 [section] Results
 [section] Case Stud
