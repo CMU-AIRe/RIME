@@ -1643,7 +1643,8 @@
   .md-grid {
     display: grid;
     /* 3 columns: left margin | main text | right margin (footnotes live in the right margin) */
-    grid-template-columns: minmax(0, 1fr) minmax(0, var(--md-main-col, 760px)) minmax(0, 1fr);
+    /* the left track is never narrower than the fixed TOC (--toc-reserve, set by ScrollMeter) */
+    grid-template-columns: minmax(var(--toc-reserve, 0px), 1fr) minmax(0, var(--md-main-col, 760px)) minmax(0, 1fr);
     column-gap: var(--toc-gap, var(--side-gap, 32px));
     align-items: start;
   }
@@ -1696,7 +1697,7 @@
   .md-footnotes {
     position: relative;
     grid-column: 3;
-    width: 260px;
+    width: min(260px, 100%); /* shrink with the margin track instead of overflowing it */
     justify-self: start;
     padding-left: calc(var(--footnote-gap, 48px) - var(--toc-gap, var(--side-gap, 32px)));
     font-size: 13px;
