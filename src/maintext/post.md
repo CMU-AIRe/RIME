@@ -109,18 +109,18 @@ Third, the stream of tasks must create both an opportunity and a need to use mem
 ## Experiments
 
 :::callout_begin type="note" title=" ":::
-**Setup at a glance.**
+<strong class="md-runin">Setup at a glance.</strong>
 
-- ***Symbolic Alchemy.*** The 10 tasks of a stream share a hidden chemistry; a useful memory records the rules the agent uncovers by experimenting. We report the oracle-normalized performance over 20 held-out chemistries and its improvement from the first to the second half of each stream.
-- ***Codebase Adaptation.*** A stream of 19 bug-fixing instances comes from two repositories excluded from training; a useful memory records how each repository is organized and tested and which mistakes to avoid. We report the cumulative reward over the stream and the cumulative gain, which is the cumulative reward minus that of a stateless run that solves every instance from scratch.
-- ***Longer streams.***  Two held-out streams of 26 and 27 bug-fixing issues, from repositories unseen in training, are more than twice as long as any training stream. They test whether the trained writer extrapolates to streams longer than those it was trained on.
+- <strong class="md-runin"><em>Symbolic Alchemy.</em></strong> The 10 tasks of a stream share a hidden chemistry; a useful memory records the rules the agent uncovers by experimenting. We report the oracle-normalized performance over 20 held-out chemistries and its improvement from the first to the second half of each stream.
+- <strong class="md-runin"><em>Codebase Adaptation.</em></strong> A stream of 19 bug-fixing instances comes from two repositories excluded from training; a useful memory records how each repository is organized and tested and which mistakes to avoid. We report the cumulative reward over the stream and the cumulative gain, which is the cumulative reward minus that of a stateless run that solves every instance from scratch.
+- <strong class="md-runin"><em>Longer streams.</em></strong>  Two held-out streams of 26 and 27 bug-fixing issues, from repositories unseen in training, are more than twice as long as any training stream. They test whether the trained writer extrapolates to streams longer than those it was trained on.
 :::callout_end:::
 
 :::fold_begin title="Symbolic Alchemy: environment and metrics":::
 
 ![](assets/figures/fig06_alchemy_chemistry.png "*Figure 6.* **An example chemistry in Symbolic Alchemy.** Each node is a stone, described by its shape, size and color, and labeled with its value. Each colored arrow is a potion, which changes one of these properties.")
 
-**1)** [**Symbolic Alchemy**](https://arxiv.org/abs/2102.02926)[**.**](https://arxiv.org/abs/2102.02926) *Symbolic Alchemy* is a toy environment in which the knowledge to be identified by solving a stream of tasks is the hidden set of rules that underlie the environment. In each task, the agent receives a fresh set of stones and potions. As shown in Figure 6, applying a potion to a stone changes the stone's properties (color, size or shape); placing a stone in the cauldron adds its value to the score. The goal of each task is to maximize this score, and the agent can see the current value of every stone but not the rules that change it. A hidden chemistry determines these transformations and values. The chemistry stays fixed across a stream of 10 tasks and is resampled between streams, so rules found in early tasks hold for the rest of the stream but do not carry over to other streams.
+<strong class="md-runin">1)</strong> [**Symbolic Alchemy**](https://arxiv.org/abs/2102.02926)[**.**](https://arxiv.org/abs/2102.02926) *Symbolic Alchemy* is a toy environment in which the knowledge to be identified by solving a stream of tasks is the hidden set of rules that underlie the environment. In each task, the agent receives a fresh set of stones and potions. As shown in Figure 6, applying a potion to a stone changes the stone's properties (color, size or shape); placing a stone in the cauldron adds its value to the score. The goal of each task is to maximize this score, and the agent can see the current value of every stone but not the rules that change it. A hidden chemistry determines these transformations and values. The chemistry stays fixed across a stream of 10 tasks and is resampled between streams, so rules found in early tasks hold for the rest of the stream but do not carry over to other streams.
 
 We evaluate on 20 held-out chemistries from the hardest level, in which the chemistry allows the fewest transitions between stone states, so high-value stones are the hardest to reach. Let $r_t$ be the agent's score on trial $t$ (the $t$-th task in the stream) and $r^{*}_t$ the score of an oracle that knows the chemistry. Performance is the mean normalized score across all 10 trials, and improvement is the mean over the last five trials minus the mean over the first five:
 
@@ -132,7 +132,7 @@ $\displaystyle \text{Performance} = \frac{1}{10}\sum _{t=1}^{10} \frac{r_t}{r_t^
 
 ![](assets/figures/fig07_clbench_protocol.png "*Figure 7.* **Evaluation protocol in** [**Continual Learning Bench**](https://arxiv.org/abs/2606.05661)**.** The same stream of instances is run twice, once by the continual learning system, which carries its state from one instance to the next, and once by a stateless baseline that is reset before every instance. The gain is the difference between the two cumulative rewards.")
 
-**2)** [**Codebase Adaptation.**](https://github.com/pgasawa/continual-learning-bench/tree/main/src/tasks/codebase_adaptation) *Codebase Adaptation* is a task from [*Continual Learning Bench*](https://arxiv.org/abs/2606.05661), in which a model implements code while acquiring procedural knowledge about the codebase on the fly (e.g., how a repository is organized, which tests to run, which debugging steps pay off).  The test stream consists of 19 bug-fixing instances from two repositories excluded from training: 9 from tablib, followed by 10 from tenacity. The agent solves them sequentially, carrying a textual memory between instances.
+<strong class="md-runin">2)</strong> [**Codebase Adaptation.**](https://github.com/pgasawa/continual-learning-bench/tree/main/src/tasks/codebase_adaptation) *Codebase Adaptation* is a task from [*Continual Learning Bench*](https://arxiv.org/abs/2606.05661), in which a model implements code while acquiring procedural knowledge about the codebase on the fly (e.g., how a repository is organized, which tests to run, which debugging steps pay off).  The test stream consists of 19 bug-fixing instances from two repositories excluded from training: 9 from tablib, followed by 10 from tenacity. The agent solves them sequentially, carrying a textual memory between instances.
 
 We run each system five times, shuffling the order of the instances within each repository, while keeping the repository order fixed. In this case, useful knowledge includes code layout, test commands, and mistakes to avoid. Each instance is scored with a reward between 0 and 1. A patch that passes the hidden tests on the first turn earns 1, and the reward falls linearly with each additional turn. A patch that fails, or an attempt that runs out of its turn budget, earns 0. Let $\bar{r} _i$ be the reward on instance $i$, averaged over the five runs. The ***cumulative reward*** sums it over the 19 instances, so it reflects both how many instances are solved and how quickly:
 
@@ -146,7 +146,7 @@ $$
 \text{Cumulative gain} = \text{Cumulative reward} _{\text{memory}} - \text{Cumulative reward} _{\text{stateless}}
 $$
 
-**Why these two domains.** Symbolic Alchemy tests whether training can teach a model to capture a compact set of hidden rules in memory through experimentation. A codebase, by contrast, has no comparable set of hidden rules and is too large to memorize in full. A good memory instead captures procedures and warnings that make the next issue easier to fix, without attempting to describe the entire repository. These domains therefore test complementary challenges: in Symbolic Alchemy, the main bottleneck is discovering the right *latent* model of the world; in a codebase, it is turning observations into structured, actionable memory.
+<strong class="md-runin">Why these two domains.</strong> Symbolic Alchemy tests whether training can teach a model to capture a compact set of hidden rules in memory through experimentation. A codebase, by contrast, has no comparable set of hidden rules and is too large to memorize in full. A good memory instead captures procedures and warnings that make the next issue easier to fix, without attempting to describe the entire repository. These domains therefore test complementary challenges: in Symbolic Alchemy, the main bottleneck is discovering the right *latent* model of the world; in a codebase, it is turning observations into structured, actionable memory.
 
 :::fold_end:::
 
@@ -170,22 +170,27 @@ To test generalization to longer streams, we build two more streams from SWE-smi
 
 We compare our method on Codebase Adaptation with the base model, frontier models with in-context learning, coding agents, and recent methods for training memory writing. Our main findings are described below.
 
-| **System** | **Harness / Scaffold** | **Cumulative reward** | **Cumulative gain** |
-| --- | --- | --- | --- |
-| Gemini 3.1 Pro\* | in-context learning | 5.13 | −1.55 |
-| Gemini 3 Flash\* | in-context learning | 7.42 | −0.33 |
-| GPT-5.4\* | in-context learning | 10.14 | +0.69 |
-| Claude Opus 4.7\* | in-context learning | 10.36 | +1.49 |
-| GPT-5.6 Sol | in-context learning | 15.20 | +4.71 |
-| Claude Opus 5.5 | in-context learning | 17.40 | +0.90 |
-| GPT-6 Astra | in-context learning | 17.25 | +2.26 |
-| Claude Sonnet 4.6\* | Claude Code | 6.63 | +0.73 |
-| GPT-5.4\* | Codex | 7.45 | −0.80 |
-| Qwen3.5-4B | in-context learning | 0.82 | −0.02 |
-| Qwen3.5-4B, untrained | our ACT + WRITE loop | 1.33 | +0.48 |
-| Qwen3.5-4B, CoD | our ACT + WRITE loop | 3.56 | −0.16 |
-| Qwen3.5-4B, SkillRise | our ACT + WRITE loop | 7.25 | +0.60 |
-| **Qwen3.5-4B, Ours** | our ACT + WRITE loop | **10.55** | **+2.27** |
+<table>
+<thead>
+<tr class="nbg-gray"><th><strong>System</strong></th><th><strong>Harness / Scaffold</strong></th><th><strong>Cumulative reward</strong></th><th><strong>Cumulative gain</strong></th></tr>
+</thead>
+<tbody>
+<tr class="nbg-orange"><td>Gemini 3.1 Pro*</td><td>in-context learning</td><td>5.13</td><td>−1.55</td></tr>
+<tr class="nbg-orange"><td>Gemini 3 Flash*</td><td>in-context learning</td><td>7.42</td><td>−0.33</td></tr>
+<tr class="nbg-orange"><td>GPT-5.4*</td><td>in-context learning</td><td>10.14</td><td>+0.69</td></tr>
+<tr class="nbg-orange"><td>Claude Opus 4.7*</td><td>in-context learning</td><td>10.36</td><td>+1.49</td></tr>
+<tr><td>GPT-5.6 Sol</td><td>in-context learning</td><td>15.20</td><td>+4.71</td></tr>
+<tr><td>Claude Opus 5.5</td><td>in-context learning</td><td>17.40</td><td>+0.90</td></tr>
+<tr><td>GPT-6 Astra</td><td>in-context learning</td><td>17.25</td><td>+2.26</td></tr>
+<tr class="nbg-yellow"><td>Claude Sonnet 4.6*</td><td>Claude Code</td><td>6.63</td><td>+0.73</td></tr>
+<tr class="nbg-yellow"><td>GPT-5.4*</td><td>Codex</td><td>7.45</td><td>−0.80</td></tr>
+<tr><td>Qwen3.5-4B</td><td>in-context learning</td><td>0.82</td><td>−0.02</td></tr>
+<tr><td>Qwen3.5-4B, untrained</td><td>our ACT + WRITE loop</td><td>1.33</td><td>+0.48</td></tr>
+<tr><td>Qwen3.5-4B, CoD</td><td>our ACT + WRITE loop</td><td>3.56</td><td>−0.16</td></tr>
+<tr><td>Qwen3.5-4B, SkillRise</td><td>our ACT + WRITE loop</td><td>7.25</td><td>+0.60</td></tr>
+<tr class="nbg-green"><td><strong>Qwen3.5-4B, Ours</strong></td><td>our ACT + WRITE loop</td><td><strong>10.55</strong></td><td><strong>+2.27</strong></td></tr>
+</tbody>
+</table>
 
 ::gray[*Table 1.* **Main results on Codebase Adaptation.** Each system's cumulative gain is measured against its own stateless run. While not an apples-to-apples comparison, observe that the cumulative gain from our approach is similar to that of GPT-6 Astra and far superior to any other method applied onto our base model, Qwen3.5-4B. (\* denotes results taken directly from the Continual Learning Bench ]::[::gray[leaderboard]::](https://continual-learning-bench.com/leaderboard.html)::gray[).]::
 
@@ -201,10 +206,15 @@ We compare our method on Codebase Adaptation with the base model, frontier model
 
 We next ask whether prompting alone is sufficient for models to write useful memories or whether explicit training is needed.
 
-| **System** | **Writer** | **Performance** | **Improvement** |
-| --- | --- | --- | --- |
-| Qwen3-4B | prompted | 0.301 | +0.086 |
-| **Qwen3-4B, ours: co-train** | **trained** | **0.490** | **+0.213** |
+<table>
+<thead>
+<tr class="nbg-gray"><th><strong>System</strong></th><th><strong>Writer</strong></th><th><strong>Performance</strong></th><th><strong>Improvement</strong></th></tr>
+</thead>
+<tbody>
+<tr><td>Qwen3-4B</td><td>prompted</td><td>0.301</td><td>+0.086</td></tr>
+<tr><td><strong>Qwen3-4B, ours: co-train</strong></td><td><strong>trained</strong></td><td><strong>0.490</strong></td><td><strong>+0.213</strong></td></tr>
+</tbody>
+</table>
 
 ::gray[*Table 2.* **Results on Symbolic Alchemy.** Both rows use the same model, with the writer either prompted or trained with our method.]::
 
@@ -266,7 +276,7 @@ Our method trains on deliberately built task streams, and this section studies w
 
 ![](assets/figures/fig13_heldout_cumulative_gain.png "*Figure 13.* **Cumulative gain at each issue position on the held-out long streams**, averaged over the two streams. Our training streams end at issue 12. Shaded regions show ±1 standard error over runs with memory.")
 
-**Extrapolation results.** Finally, we evaluate if our procedure allows us to extrapolate to longer sequences of tasks. As shown in Table 4, our approach still performs the best on streams more than twice as long as those used in training<strong>.</strong> Concretely, the two held-out streams contain 26 and 27 issues, compared with only 12 tasks in our training streams. Our model achieves the highest cumulative reward and cumulative gain on both. As shown in Figure 13, the cumulative gain of our method continues to rise beyond the twelfth issue (the length of our training streams), and continues to increase thereafter. In contrast, the cumulative gain of the model trained on shuffled segments soon levels off, while that of the model trained on three-issue segments declines over the later issues and ends below zero. These results suggest that giving memories repeated opportunities to be used during training helps the writer generalize to much longer streams, the extrapolation our training data was designed to support.
+<strong class="md-runin">Extrapolation results.</strong> Finally, we evaluate if our procedure allows us to extrapolate to longer sequences of tasks. As shown in Table 4, our approach still performs the best on streams more than twice as long as those used in training<strong>.</strong> Concretely, the two held-out streams contain 26 and 27 issues, compared with only 12 tasks in our training streams. Our model achieves the highest cumulative reward and cumulative gain on both. As shown in Figure 13, the cumulative gain of our method continues to rise beyond the twelfth issue (the length of our training streams), and continues to increase thereafter. In contrast, the cumulative gain of the model trained on shuffled segments soon levels off, while that of the model trained on three-issue segments declines over the later issues and ends below zero. These results suggest that giving memories repeated opportunities to be used during training helps the writer generalize to much longer streams, the extrapolation our training data was designed to support.
 
 ### **Q5. One policy or two?**
 
@@ -281,7 +291,7 @@ So far we have trained a single model to operate in both the actor and writer ro
 
 ::gray[*Table 5.* **Shared versus separate parameters for the actor and the writer on Codebase Adaptation**. All variants start from the same checkpoint of our method, the branch point, and are trained with identical rewards and data for the same number of steps. Continuing to train the shared policy (bold) gives the highest cumulative reward and cumulative gain.]::
 
-**Setup.** We branch from a checkpoint of our method taken around iteration 300, at which point the co-trained model already performs both acting and memory writing well, and continue training under three regimes with identical rewards and data. We compare continued training of this co-trained policy with two variants initialized from the same checkpoint, in which the actor and the writer maintain a separate copy of the parameters and the writer is either frozen or trained. Results are shown in Table 5.
+<strong class="md-runin">Setup.</strong> We branch from a checkpoint of our method taken around iteration 300, at which point the co-trained model already performs both acting and memory writing well, and continue training under three regimes with identical rewards and data. We compare continued training of this co-trained policy with two variants initialized from the same checkpoint, in which the actor and the writer maintain a separate copy of the parameters and the writer is either frozen or trained. Results are shown in Table 5.
 
 **With a frozen writer, the actor’s gains from memory disappear.** Freezing the writer and training the actor alone leaves cumulative reward roughly unchanged, while cumulative gain falls to nearly zero, below its value at the branch point. Note that in this experiment, during training and evaluation, the actor receives memories produced by the same fixed writer. This result highlights the need to train the actor and writer together: with a fixed writer, the actor can learn to increase exploration reward while relying less on memory for subsequent tasks.
 
