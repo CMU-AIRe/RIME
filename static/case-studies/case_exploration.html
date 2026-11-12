@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scoring memory updates</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=STIX+Two+Text:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Standalone page. Layout: stream strip, stepper, then one column (or two side by side, stacked on phones). */
+:root{
+  --bg:#FAF9FC; --surface:#FFFFFF; --ink:#1F2328; --muted:#646a74; --rule:#E2E1E8;
+  --mem:#6A4C9C; --mem-soft:#F2EEF8; --mem-line:#D9CFEA;
+  --act:#3B4763; --act-soft:#ECEEF3;
+  --amber:#9A6200; --amber-soft:#FCEFD3;
+  --repo-a:#C9CDD6; --repo-b:#9AA3B5;
+  --ok:#2F6B4F; --bad:#9B3B32;
+  --code-bg:#F6F5F9;
+  --f-display:"STIX Two Text","STIX Two Math",Georgia,"Times New Roman",serif;
+  --f-body:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15141A; --surface:#1D1C24; --ink:#E9E7EF; --muted:#A09DAB; --rule:#33313D;
+    --mem:#B79BE6; --mem-soft:#2A2338; --mem-line:#4A3D63;
+    --act:#AEB9D3; --act-soft:#252935;
+    --amber:#F0B84F; --amber-soft:#3A2D12;
+    --repo-a:#4A4D57; --repo-b:#6E7790;
+    --ok:#7CC6A0; --bad:#E58A80;
+    --code-bg:#19181F;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15141A; --surface:#1D1C24; --ink:#E9E7EF; --muted:#A09DAB; --rule:#33313D;
+  --mem:#B79BE6; --mem-soft:#2A2338; --mem-line:#4A3D63;
+  --act:#AEB9D3; --act-soft:#252935;
+  --amber:#F0B84F; --amber-soft:#3A2D12;
+  --repo-a:#4A4D57; --repo-b:#6E7790;
+  --ok:#7CC6A0; --bad:#E58A80;
+  --code-bg:#19181F;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg); color:var(--ink); font-family:var(--f-body); font-size:15px; line-height:1.6;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1120px; margin:0 auto; padding-block:28px 40px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px));
+  display:grid; gap:22px}
+.wrap.single{max-width:900px}
+h1{font-family:var(--f-display); font-weight:600; font-size:clamp(24px,3.4vw,32px); line-height:1.15; margin:0; text-wrap:balance}
+.lede{margin:6px 0 0; color:var(--muted); max-width:76ch}
+.lede b{color:var(--ink); font-weight:600}
+code.i{font-family:var(--f-mono); font-size:.88em; background:var(--code-bg); border:1px solid var(--rule); border-radius:3px; padding:0 4px}
+
+/* stream strip */
+.stream{display:grid; gap:8px}
+.stream-row{display:flex; gap:3px; align-items:flex-end}
+.tick{height:22px; border-radius:2px; background:var(--repo-a)}
+.tick.b{background:var(--repo-b)}
+.tick.focus{outline:2px solid var(--mem); outline-offset:1px}
+.tick.now{background:var(--mem)}
+.stream-legend{display:flex; flex-wrap:wrap; gap:6px 18px; font-size:12.5px; color:var(--muted)}
+.sw{display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:6px; vertical-align:-1px}
+
+/* stepper */
+.stepper{display:grid; gap:8px}
+.step-btn{appearance:none; text-align:left; font:inherit; color:var(--muted); background:var(--surface);
+  border:1px solid var(--rule); border-radius:6px; padding:10px 12px; cursor:pointer; display:grid; gap:2px; min-width:0}
+.step-btn .n{font-family:var(--f-mono); font-size:11.5px; letter-spacing:.04em}
+.step-btn .t{font-weight:600; font-size:13.5px; color:var(--ink); line-height:1.3}
+.step-btn[aria-selected="true"]{border-color:var(--mem); background:var(--mem-soft)}
+.step-btn[aria-selected="true"] .n{color:var(--mem)}
+.step-btn:focus-visible{outline:2px solid var(--mem); outline-offset:2px}
+.note{margin:0; max-width:80ch}
+.controls{display:flex; flex-wrap:wrap; gap:10px 18px; align-items:center; justify-content:space-between}
+.toggles{display:flex; flex-wrap:wrap; gap:8px 16px; font-size:13px; color:var(--muted)}
+.toggles label{display:inline-flex; gap:6px; align-items:center; cursor:pointer}
+.nav{display:flex; gap:8px}
+.nav button{appearance:none; font:inherit; font-size:13px; font-weight:500; color:var(--ink); background:var(--surface);
+  border:1px solid var(--rule); border-radius:6px; padding:6px 12px; cursor:pointer}
+.nav button:disabled{opacity:.4; cursor:default}
+.nav button:focus-visible{outline:2px solid var(--mem); outline-offset:2px}
+
+/* columns */
+.pair{display:grid; grid-template-columns:repeat(var(--cols,2),minmax(0,1fr)); gap:18px}
+.col{display:grid; gap:12px; align-content:start; min-width:0}
+.col-head{display:flex; flex-wrap:wrap; gap:6px 12px; align-items:baseline; justify-content:space-between;
+  border-bottom:2px solid var(--rule); padding-bottom:8px}
+.col.ours .col-head{border-bottom-color:var(--mem)}
+.arm{font-family:var(--f-display); font-weight:600; font-size:19px}
+.arm small{font-family:var(--f-body); font-weight:400; font-size:12.5px; color:var(--muted); margin-left:6px}
+.task{font-family:var(--f-mono); font-size:12.5px; color:var(--muted)}
+.outcome{display:flex; flex-wrap:wrap; gap:6px; font-size:12.5px; font-variant-numeric:tabular-nums}
+.pill{border-radius:999px; padding:2px 10px; border:1px solid var(--rule); background:var(--surface); white-space:nowrap}
+.pill.ok{color:var(--ok); border-color:currentColor}
+.pill.bad{color:var(--bad); border-color:currentColor}
+
+/* memory */
+.mem{border:1px solid var(--mem-line); border-left:3px solid var(--mem); border-radius:4px; background:var(--mem-soft); min-width:0}
+.mem-bar{display:flex; justify-content:space-between; gap:8px; padding:7px 12px; font-size:12px; color:var(--mem); font-weight:600;
+  border-bottom:1px solid var(--mem-line)}
+.mem-bar span:last-child{font-weight:400; color:var(--muted); font-family:var(--f-mono); white-space:nowrap}
+details.mem > summary{list-style:none; cursor:pointer}
+details.mem > summary::-webkit-details-marker{display:none}
+details.mem:not([open]) > summary.mem-bar{border-bottom:0}
+details.mem > summary .tw::before{content:"▸ "; }
+details.mem[open] > summary .tw::before{content:"▾ "; }
+.mem pre{margin:0; padding:12px; font-family:var(--f-mono); font-size:12.4px; line-height:1.6; white-space:pre-wrap; word-break:break-word;
+  color:var(--ink); overflow-x:auto}
+.ln{display:block; padding-left:14px; text-indent:-14px}
+.ln.add{background:color-mix(in srgb, var(--mem) 12%, transparent)}
+.ln.add::before{content:"+ "; color:var(--mem); font-weight:500}
+.dropped{border-top:1px dashed var(--mem-line); padding:8px 12px 10px}
+.dropped summary{cursor:pointer; font-size:12px; color:var(--muted)}
+.dropped pre{padding:8px 0 0; color:var(--muted); text-decoration:line-through; text-decoration-color:color-mix(in srgb, var(--muted) 60%, transparent)}
+mark{color:inherit; border-radius:2px; padding:0 1px}
+mark{-webkit-box-decoration-break:clone; box-decoration-break:clone; text-decoration-line:underline; text-decoration-thickness:2px; text-underline-offset:3px}
+mark.warn{background:var(--amber-soft); text-decoration-color:var(--amber)}
+mark.know{background:color-mix(in srgb, var(--mem) 18%, transparent); text-decoration-color:var(--mem)}
+body.nohl mark{background:none; text-decoration:none}
+
+/* writer output */
+details.raw{border:1px dashed var(--mem-line); border-radius:4px; background:var(--surface)}
+details.raw summary{cursor:pointer; padding:7px 12px; font-size:12px; color:var(--mem); font-weight:600}
+details.raw pre{margin:0; padding:0 12px 12px; font-family:var(--f-mono); font-size:12.2px; line-height:1.55; white-space:pre-wrap; word-break:break-word; max-height:480px; overflow:auto}
+
+/* actor turns */
+.act{border:1px solid var(--rule); border-left:3px solid var(--act); border-radius:4px; background:var(--surface); min-width:0}
+.act-bar{display:flex; justify-content:space-between; gap:8px; padding:7px 12px; font-size:12px; color:var(--act); font-weight:600; border-bottom:1px solid var(--rule)}
+.act-bar button{appearance:none; font:inherit; font-size:11.5px; font-weight:500; color:var(--muted); background:none; border:0; cursor:pointer; padding:0}
+.act-bar button:focus-visible{outline:2px solid var(--act); outline-offset:2px}
+.turns{display:grid}
+details.turn{border-top:1px solid var(--rule)}
+details.turn:first-child{border-top:0}
+details.turn > summary{cursor:pointer; display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:10px; align-items:baseline; padding:7px 12px}
+details.turn > summary::-webkit-details-marker{display:none}
+details.turn > summary .s{font-family:var(--f-mono); font-size:11px; color:var(--muted); white-space:nowrap}
+details.turn > summary .c{font-family:var(--f-mono); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0}
+details.turn > summary .tag{font-size:11px; color:var(--muted); white-space:nowrap}
+details.turn.key > summary .s{color:var(--act); font-weight:600}
+details.turn.key > summary{background:var(--act-soft)}
+.turn-body{display:grid; gap:8px; padding:4px 12px 12px}
+.turn-body .lab{font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); font-weight:600}
+.turn-body .think{font-size:13px; white-space:pre-wrap; word-break:break-word; margin:0}
+.turn-body pre{margin:0; font-family:var(--f-mono); font-size:12px; line-height:1.55; background:var(--code-bg); border:1px solid var(--rule); border-radius:3px;
+  padding:6px 8px; white-space:pre-wrap; word-break:break-word; max-height:320px; overflow:auto}
+.turn-body pre.obs{color:var(--muted)}
+.cut{color:var(--muted); font-style:italic}
+details.turn.tall .turn-body pre, .mem.tall pre{max-height:none}
+
+.legend{display:flex; flex-wrap:wrap; gap:6px 18px; font-size:12.5px; color:var(--muted)}
+.foot{font-size:12.5px; color:var(--muted); border-top:1px solid var(--rule); padding-top:12px}
+.foot code{font-family:var(--f-mono); font-size:11.5px; word-break:break-all}
+
+details.act-c > summary{cursor:pointer; list-style:none}
+details.act-c > summary::-webkit-details-marker{display:none}
+details.act-c:not([open]) > summary.act-bar{border-bottom:0}
+details.act-c > summary .tw::before{content:"▸ "}
+details.act-c[open] > summary .tw::before{content:"▾ "}
+.act-bar .cnt{font-weight:400; color:var(--muted); font-family:var(--f-mono); white-space:nowrap}
+/* page header and example tabs */
+.page-head h1{margin-bottom:2px}
+.tabs{display:flex; flex-wrap:wrap; gap:6px; border-bottom:1px solid var(--rule); padding-bottom:10px}
+.tab-btn{appearance:none; font:inherit; font-size:13.5px; font-weight:500; color:var(--muted); background:var(--surface);
+  border:1px solid var(--rule); border-radius:999px; padding:5px 14px; cursor:pointer}
+.tab-btn[aria-selected="true"]{color:var(--ink); border-color:var(--mem); background:var(--mem-soft)}
+.tab-btn:focus-visible{outline:2px solid var(--mem); outline-offset:2px}
+.example{display:grid; gap:22px}
+h2{font-family:var(--f-display); font-weight:600; font-size:clamp(19px,2.4vw,23px); line-height:1.25; margin:0; text-wrap:balance}
+.tcell{flex:1 1 0; min-width:6px; display:flex; flex-direction:column; gap:3px; align-items:stretch}
+.tval{font-family:var(--f-mono); font-size:11px; color:var(--muted); text-align:center; font-variant-numeric:tabular-nums}
+.tblock{margin:0; padding:10px 12px; border:1px dashed var(--rule); border-radius:4px; color:var(--muted); font-size:13.5px}
+.act-intro{padding:8px 12px 10px; border-bottom:1px solid var(--rule); display:grid; gap:4px}
+.act-intro .lab{font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); font-weight:600}
+.act-intro pre{margin:0; font-family:var(--f-mono); font-size:12px; line-height:1.5; background:var(--code-bg); border:1px solid var(--rule); border-radius:3px; padding:6px 8px; white-space:pre-wrap; word-break:break-word; color:var(--muted); max-height:220px; overflow:auto}
+@media (max-width:760px){
+  .pair{grid-template-columns:minmax(0,1fr)}
+  .stepper{grid-template-columns:repeat(2,minmax(0,1fr)) !important}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+#stepper,.nav{display:none}
+</style>
+</head>
+<body>
+<div class="wrap" id="wrap">
+  <header class="page-head">
+    <h1 id="h1"></h1>
+    <p class="lede" id="page-lede"></p>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Examples" id="tabs"></nav>
+
+  <section class="example" id="example">
+    <header>
+      <h2 id="h2"></h2>
+      <p class="lede" id="lede"></p>
+    </header>
+
+    <section class="stream" aria-label="Position in the stream">
+      <div class="stream-row" id="ticks"></div>
+      <div class="stream-legend" id="stream-legend"></div>
+    </section>
+
+    <nav class="stepper" role="tablist" aria-label="Steps" id="stepper"></nav>
+
+    <p class="note" id="note"></p>
+
+    <div class="controls">
+      <div class="toggles">
+        <label for="hl"><input type="checkbox" id="hl" checked> Highlight</label>
+        <label for="diff"><input type="checkbox" id="diff" checked> Mark changes from the previous memory</label>
+      </div>
+      <div class="nav">
+        <button type="button" id="prev">← Previous</button>
+        <button type="button" id="next">Next →</button>
+      </div>
+    </div>
+
+    <div class="legend" id="hl-legend"></div>
+
+    <div class="pair" id="pair"></div>
+
+    <footer class="foot" id="foot"></footer>
+  </section>
+</div>
+
+<script id="case-data" type="application/json">{"id": "case-exploration", "title": "Scoring memory updates", "lede": "During training, the actor on task t receives an exploration reward e<sub>t<\/sub> between 0 and 1. An LLM judge compares the memory before the task (M<sub>t−1<\/sub>) with the memory the writer produces after it (M<sub>t<\/sub>), and scores high when M<sub>t<\/sub> adds to M<sub>t−1<\/sub> or corrects it, and low when the update is redundant. Both examples below come from the same training stream at the same training step. Across training steps 108–190 of this run, the judge scored 15,936 memory updates: mean 0.71, most often 0.875 (43%), and 2% at 0.25 or below. Choose an example below.", "examples": [{"id": "high-exploration", "tab": "High exploration reward", "heading": "Exploration reward 0.875: a new fix and a general rule", "lede": "Task 5 of a 12-task training stream. The actor solves an <code class=\"i\">AttributeError<\/code> in <code class=\"i\">deepdiff/delta.py<\/code>, and the writer turns it into a general rule. Left: the memory the actor starts the task from (M<sub>t−1<\/sub>). Right: the memory the writer produces after it (M<sub>t<\/sub>), with the judge's score. Both memories are shown in full, exactly as written.", "stream": {"unit": "task", "segments": [{"label": "deepdiff", "n": 6, "legend": "deepdiff, tasks 1–6"}, {"label": "patsy", "n": 6, "legend": "patsy, tasks 7–12"}], "focus": [5]}, "arms": [{"key": "before", "name": "Before the task", "sub": "memory the actor starts from"}, {"key": "after", "name": "After the task", "sub": "memory the writer produces"}], "legend": [{"kind": "know", "label": "not in the memory before the task"}, {"kind": "warn", "label": "the same point in both memories, reworded"}], "stages": [{"title": "Memory before and after task 5", "now": [5], "head": {"before": "task 5 of 12 · deepdiff · func_pm_op_swap__lilfak3a", "after": "task 5 of 12 · deepdiff · func_pm_op_swap__lilfak3a"}, "note": "The writer records the new fix, an <code class=\"i\">AttributeError<\/code> in <code class=\"i\">Delta.__init__()<\/code>, and adds two general lessons: put guards such as <code class=\"i\">hasattr()<\/code> before the attribute access they protect, and rely on short-circuit <code class=\"i\">and<\/code>. Two lessons from the previous memory, patching through a heredoc Python script and checking the fix with an inline script, are kept in new words. The notes on the previous task (the inverted <code class=\"i\">LFUCache.__contains__()<\/code> in <code class=\"i\">deepdiff/lfucache.py<\/code>) and the lessons about negation and the <code class=\"i\">in<\/code> operator are no longer in the memory. The judge gives 2 of 2 for new discoveries, verification targets and non-redundant change, and 1 of 2 for error correction.", "cols": {"before": [{"type": "mem", "title": "Memory before task 5", "text": "### Repository Knowledge\n- Located and corrected a logical inversion bug in `deepdiff/lfucache.py` where `LFUCache.__contains__()` returned `key not in self.cache` instead of `key in self.cache`, affecting membership checks\n- The repository uses standard Python instantiations where `LFUCache` requires explicit method calls (e.g., `.set()`, `.get()`) rather than dictionary-like item assignment when verifying fixes, and relies on submission via `echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT` after local validation\n\n### Lessons & Pitfalls\n- Logic reversals in `__contains__` and similar guards are frequently missed; always verify negation keywords (`not` vs positive checks) around membership or containment methods\n- Decision to apply patch via heredoc Python script ensured safe, atomic file edits without complex shell escaping, avoiding fragmentation or accidental multi-line misedits\n- Confirm fix with a standalone inline verification script that mimics expected usage patterns before submitting guarantees the error is resolved and prevents regressions\n- Successful submission followed the validated sequence: inspect source → patch → validate behavior → submit single echo command once behavior is confirmed\n- Where the `in` operator is expected for container membership, rely on direct `in` expression checks rather than depending on whether the container exposes `__getitem__` or `__setitem__` in reality", "prev": null, "marks": [{"kind": "warn", "text": "heredoc Python script"}, {"kind": "warn", "text": "inline verification script"}], "collapsed": false, "tall": false}], "after": [{"type": "mem", "title": "Memory after task 5", "text": "### Repository Knowledge\n- Identified and resolved an `AttributeError` in `deepdiff/delta.py` during `Delta.__init__()` where a short-circuit condition incorrectly accessed `deserializer.__code__` before verifying its existence with `hasattr()`, requiring reordering the compound boolean expression so existence checking precedes attribute access\n- Successfully submitted the fix using `echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT` after confirming the logic correction with a minimal inline verification script that tested the safe `hasattr()` pattern\n\n### Lessons & Pitfalls\n- Always reorder condition checks so safety guards like `hasattr()`, `isinstance()`, or existence verification occur before any dependent attribute/method access to prevent `AttributeError` on objects lacking expected structure\n- When modifying compound boolean logic involving optional attributes, use Python's short-circuit evaluation (`and`) to ensure early exits once a guard condition fails, avoiding unnecessary attribute lookups\n- Automated patching via a heredoc Python script proved reliable for multi-line or alphabetical string replacements, minimizing shell escaping risks and preserving file integrity before final submission\n- Direct inline verification of the corrected logic—preferably mirroring the failing edge case—confirms the repair prior to submitting the patch to the evaluation harness", "prev": "### Repository Knowledge\n- Located and corrected a logical inversion bug in `deepdiff/lfucache.py` where `LFUCache.__contains__()` returned `key not in self.cache` instead of `key in self.cache`, affecting membership checks\n- The repository uses standard Python instantiations where `LFUCache` requires explicit method calls (e.g., `.set()`, `.get()`) rather than dictionary-like item assignment when verifying fixes, and relies on submission via `echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT` after local validation\n\n### Lessons & Pitfalls\n- Logic reversals in `__contains__` and similar guards are frequently missed; always verify negation keywords (`not` vs positive checks) around membership or containment methods\n- Decision to apply patch via heredoc Python script ensured safe, atomic file edits without complex shell escaping, avoiding fragmentation or accidental multi-line misedits\n- Confirm fix with a standalone inline verification script that mimics expected usage patterns before submitting guarantees the error is resolved and prevents regressions\n- Successful submission followed the validated sequence: inspect source → patch → validate behavior → submit single echo command once behavior is confirmed\n- Where the `in` operator is expected for container membership, rely on direct `in` expression checks rather than depending on whether the container exposes `__getitem__` or `__setitem__` in reality", "marks": [{"kind": "know", "text": "an `AttributeError` in `deepdiff/delta.py` during `Delta.__init__()`"}, {"kind": "know", "text": "Always reorder condition checks so safety guards like `hasattr()`, `isinstance()`, or existence verification occur before any dependent attribute/method access"}, {"kind": "know", "text": "use Python's short-circuit evaluation (`and`)"}, {"kind": "warn", "text": "heredoc Python script"}, {"kind": "warn", "text": "inline verification script"}], "collapsed": false, "tall": false}, {"type": "outcome", "pills": [{"t": "exploration reward 0.875", "cls": "ok"}, {"t": "task reward 0.825", "cls": ""}, {"t": "solved", "cls": "ok"}, {"t": "8 turns", "cls": ""}]}, {"type": "outcome", "pills": [{"t": "new discoveries 2 of 2", "cls": ""}, {"t": "error correction 1 of 2", "cls": ""}, {"t": "verification targets 2 of 2", "cls": ""}, {"t": "non-redundant change 2 of 2", "cls": ""}]}, {"type": "raw", "title": "Judge's rationale, as logged with the score", "text": "Recorded a new, reusable debugging pattern about ordering safety checks for attribute access and added a concrete file where this occurred.", "marks": []}]}}], "footer": "Codebase Adaptation, one training stream of 12 tasks (6 deepdiff, then 6 patsy). Qwen3.5-4B trained with our method, writer and actor trained, with the exploration reward on the actor. Run <code>smith-4b-v3nocurr-explore-gwin-think<\/code> (training steps 0–190 of our main Codebase Adaptation run), training step 133, stream position 5 of 12. Both examples on this page come from this same stream, <code>traj/train/rollout_133/ep_2136_episode_train_56_267.json<\/code>. Memories, judge scores and the judge's rationale are copied verbatim from that training log; nothing was re-scored. The judge (gpt-5-mini) scores four dimensions from 0 to 2, and e<sub>t<\/sub> is their sum divided by 8."}, {"id": "low-exploration", "tab": "Low exploration reward", "heading": "Exploration reward 0.25: the same memory in new words", "lede": "Task 12, the last task of the same training stream. The actor solves it, and the writer restates the memory it already had. Left: the memory the actor starts the task from (M<sub>t−1<\/sub>). Right: the memory the writer produces after it (M<sub>t<\/sub>), with the judge's score. Both memories are shown in full, exactly as written.", "stream": {"unit": "task", "segments": [{"label": "deepdiff", "n": 6, "legend": "deepdiff, tasks 1–6"}, {"label": "patsy", "n": 6, "legend": "patsy, tasks 7–12"}], "focus": [12]}, "arms": [{"key": "before", "name": "Before the task", "sub": "memory the actor starts from"}, {"key": "after", "name": "After the task", "sub": "memory the writer produces"}], "legend": [{"kind": "know", "label": "not in the memory before the task"}, {"kind": "warn", "label": "the same point in both memories, reworded"}], "stages": [{"title": "Memory before and after task 12", "now": [12], "head": {"before": "task 12 of 12 · patsy · func_pm_op_change__p2i3dqsb", "after": "task 12 of 12 · patsy · func_pm_op_change__p2i3dqsb"}, "note": "On task 12 the actor first searches for the file and method the memory names, makes the one-line edit the memory already describes in <code class=\"i\">DesignMatrix._repr_pretty_()<\/code>, and the task is graded solved after 6 turns. The writer rewrites each of the five bullets of the previous memory in new words: the same file, method and format expression, the same 147-test run, and the same three lessons. The one added detail is that the error occurs “during multi‑column numerical factor formatting”. Because every bullet is reworded, the line diff marks all five as changed. The judge gives 1 of 2 for new discoveries and for non-redundant change, and 0 for error correction and verification targets.", "cols": {"before": [{"type": "mem", "title": "Memory before task 12", "text": "### Repository Knowledge\n- `DesignMatrix._repr_pretty_()` in `patsy/design_info.py` contained a Python 3 compatibility bug where `\" (%s)\" % (coltext,)` incorrectly wrapped the format value in a tuple, triggering `TypeError: unsupported operand types for %: 'tuple' and 'str'`\n- Full test suite validation (all 147 tests passing) confirmed the fix before submission; submission completed via `echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT`\n\n### Lessons & Pitfalls\n- In Python 3, avoid trailing commas in single-argument string formatting tuples (e.g., `\"%s\" % (val,)`) which `repr_pretty_()` methods sometimes use implicitly from stale Python 2 patterns; prefer `\"%s\" % val`\n- Always run the complete test suite after editing production code to catch type or grammar errors before submitting patches\n- Use `git diff` to review changes before submission and confirm edits align with reported error locations rather than relying solely on traceback context", "prev": null, "marks": [{"kind": "warn", "text": "`\" (%s)\" % (coltext,)`"}, {"kind": "warn", "text": "all 147 tests passing"}, {"kind": "warn", "text": "`\"%s\" % (val,)`"}, {"kind": "warn", "text": "complete test suite"}, {"kind": "warn", "text": "`git diff`"}], "collapsed": false, "tall": false}], "after": [{"type": "mem", "title": "Memory after task 12", "text": "### Repository Knowledge\n- Located and repaired a Python 3 compatibility bug in `patsy/design_info.py` where `DesignMatrix._repr_pretty_()` incorrectly used `\" (%s)\" % (coltext,)` (trailing comma creating an unintended tuple), causing a `TypeError` during multi‑column numerical factor formatting\n- Resolved the issue by removing the extraneous comma; validated the patch by running the full 147‑test suite and submitting via `echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT`\n\n### Lessons & Pitfalls\n- Avoid Python 2‑style trailing commas in single‑argument string formats (`\"%s\" % (val,)`) inside methods like `_repr_pretty_()`, as they break in Python 3 and produce opaque `TypeError`s\n- Always execute the complete test suite immediately after editing production code to catch type or syntax errors before final submission\n- Confirm the exact error location with `git diff` against the traceback before applying the patch to prevent unnecessary edits", "prev": "### Repository Knowledge\n- `DesignMatrix._repr_pretty_()` in `patsy/design_info.py` contained a Python 3 compatibility bug where `\" (%s)\" % (coltext,)` incorrectly wrapped the format value in a tuple, triggering `TypeError: unsupported operand types for %: 'tuple' and 'str'`\n- Full test suite validation (all 147 tests passing) confirmed the fix before submission; submission completed via `echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT`\n\n### Lessons & Pitfalls\n- In Python 3, avoid trailing commas in single-argument string formatting tuples (e.g., `\"%s\" % (val,)`) which `repr_pretty_()` methods sometimes use implicitly from stale Python 2 patterns; prefer `\"%s\" % val`\n- Always run the complete test suite after editing production code to catch type or grammar errors before submitting patches\n- Use `git diff` to review changes before submission and confirm edits align with reported error locations rather than relying solely on traceback context", "marks": [{"kind": "warn", "text": "`\" (%s)\" % (coltext,)`"}, {"kind": "know", "text": "during multi‑column numerical factor formatting"}, {"kind": "warn", "text": "147‑test suite"}, {"kind": "warn", "text": "`\"%s\" % (val,)`"}, {"kind": "warn", "text": "complete test suite"}, {"kind": "warn", "text": "`git diff`"}], "collapsed": false, "tall": false}, {"type": "outcome", "pills": [{"t": "exploration reward 0.25", "cls": "bad"}, {"t": "task reward 0.875", "cls": ""}, {"t": "solved", "cls": "ok"}, {"t": "6 turns", "cls": ""}]}, {"type": "outcome", "pills": [{"t": "new discoveries 1 of 2", "cls": ""}, {"t": "error correction 0 of 2", "cls": ""}, {"t": "verification targets 0 of 2", "cls": ""}, {"t": "non-redundant change 1 of 2", "cls": ""}]}, {"type": "raw", "title": "Judge's rationale, as logged with the score", "text": "The update mostly restates the same single-issue fix and lessons with no new repository-wide insights or new verification leads.", "marks": []}]}}], "footer": "Codebase Adaptation, one training stream of 12 tasks (6 deepdiff, then 6 patsy). Qwen3.5-4B trained with our method, writer and actor trained, with the exploration reward on the actor. Run <code>smith-4b-v3nocurr-explore-gwin-think<\/code> (training steps 0–190 of our main Codebase Adaptation run), training step 133, stream position 12 of 12. Both examples on this page come from this same stream, <code>traj/train/rollout_133/ep_2136_episode_train_56_267.json<\/code>. Memories, judge scores and the judge's rationale are copied verbatim from that training log; nothing was re-scored. The judge (gpt-5-mini) scores four dimensions from 0 to 2, and e<sub>t<\/sub> is their sum divided by 8."}]}</script>
+<script>
+(function(){
+  const P = JSON.parse(document.getElementById('case-data').textContent);
+  const EX = P.examples;
+  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fmt = n => n.toLocaleString('en-US');
+  const store = {
+    get(k){ try { return localStorage.getItem(k); } catch(e) { return null; } },
+    set(k,v){ try { localStorage.setItem(k, v); } catch(e) {} }
+  };
+  let ex = 0, cur = 0;
+
+  function highlight(html, marks){
+    (marks || []).forEach(m => {
+      const needle = esc(m.text);
+      const i = html.indexOf(needle);
+      if (i >= 0) html = html.slice(0,i) + '<mark class="'+m.kind+'">' + needle + '</mark>' + html.slice(i + needle.length);
+    });
+    return html;
+  }
+
+  function memBlock(b, showDiff){
+    const text = b.text;
+    const lines = text.split('\n');
+    const hasPrev = b.prev !== null && b.prev !== undefined;
+    const prevSet = new Set((b.prev || '').split('\n').map(l => l.trim()).filter(Boolean));
+    const curSet = new Set(lines.map(l => l.trim()).filter(Boolean));
+    let body = lines.map(l => {
+      const added = showDiff && hasPrev && l.trim() && !prevSet.has(l.trim());
+      return '<span class="ln' + (added ? ' add' : '') + '">' + (esc(l) || '&nbsp;') + '</span>';
+    }).join('');
+    body = highlight(body, b.marks);
+    let dropped = '';
+    if (showDiff && hasPrev) {
+      const gone = b.prev.split('\n').filter(l => l.trim() && !curSet.has(l.trim()));
+      if (gone.length) dropped = '<details class="dropped"><summary>' + gone.length + ' line' + (gone.length>1?'s':'') +
+        ' from the previous memory are gone</summary><pre>' + esc(gone.join('\n')) + '</pre></details>';
+    }
+    const tall = b.tall ? ' tall' : '';
+    const bar = '<span class="tw">' + esc(b.title) + '</span><span>' + fmt(text.length) + ' chars</span>';
+    if (b.collapsed) return '<details class="mem' + tall + '"><summary class="mem-bar">' + bar + '</summary><pre>' + body + '</pre>' + dropped + '</details>';
+    return '<div class="mem' + tall + '"><div class="mem-bar">' + bar.replace('class="tw"','') + '</div><pre>' + body + '</pre>' + dropped + '</div>';
+  }
+
+  function outcome(b){
+    return '<div class="outcome">' + b.pills.map(p => '<span class="pill' + (p.cls ? ' ' + p.cls : '') + '">' + esc(p.t) + '</span>').join('') + '</div>';
+  }
+
+  function cutText(s, cut){
+    if (!cut) return esc(s);
+    const marker = '<span class="cut">[' + fmt(cut.dropped) + ' characters not shown]</span>';
+    return cut.where === 'head' ? marker + '\n' + esc(s) : esc(s) + '\n' + marker;
+  }
+
+  function actBlock(b, bi){
+    const rows = b.turns.map(t => {
+      const first = (t.command.split('\n')[0] || '').slice(0, 200);
+      let inner = '';
+      if (t.think) inner += '<div class="lab">reasoning</div><p class="think">' + highlight(esc(t.think), t.marks) + '</p>';
+      inner += '<div class="lab">' + esc(b.cmdLabel || 'command') + '</div><pre>' + highlight(esc(t.command), t.marks) + '</pre>';
+      if (t.obs !== null && t.obs !== undefined) inner += '<div class="lab">environment output</div><pre class="obs' + (t.end ? ' end' : '') + '">' + highlight(cutText(t.obs, t.obs_cut), t.marks) + '</pre>';
+      return '<details class="turn' + (t.key ? ' key' : '') + (t.tall ? ' tall' : '') + '"' + (t.open ? ' open' : '') + '><summary><span class="s">turn ' + (t.step+1) +
+        '</span><span class="c">' + esc(first) + '</span><span class="tag">' + esc(t.tag || '') + '</span></summary><div class="turn-body">' + inner + '</div></details>';
+    }).join('');
+    const intro = b.intro ? '<div class="act-intro"><div class="lab">' + esc(b.intro.label) + '</div><pre class="obs">' + esc(b.intro.text) + '</pre></div>' : '';
+    if (b.collapsed) return '<details class="act act-c"><summary class="act-bar"><span class="tw">' + esc(b.title) + '</span><span class="cnt">' +
+      b.turns.length + ' turns</span></summary>' + intro + '<div class="turns">' + rows + '</div></details>';
+    return '<div class="act"><div class="act-bar"><span>' + esc(b.title) + '</span><button type="button" data-act="' + bi + '">expand all</button></div>' + intro +
+      '<div class="turns" id="act-' + bi + '">' + rows + '</div></div>';
+  }
+
+  function rawBlock(b){
+    return '<details class="raw"><summary>' + esc(b.title) + '</summary><pre>' + highlight(esc(b.text), b.marks) + '</pre></details>';
+  }
+
+  function textBlock(b){ return '<p class="tblock">' + b.text + '</p>'; }
+
+  function renderStage(){
+    const D = EX[ex], st = D.stages[cur];
+    const showDiff = document.getElementById('diff').checked;
+    const hl = document.getElementById('hl').checked;
+    document.body.classList.toggle('nohl', !hl);
+    document.getElementById('hl-legend').hidden = !hl || !D.legend.length;
+    document.querySelectorAll('.step-btn').forEach((b,i) => { b.setAttribute('aria-selected', i===cur ? 'true':'false'); b.tabIndex = i===cur ? 0 : -1; });
+    document.getElementById('note').innerHTML = st.note;
+    document.querySelectorAll('.tick').forEach((t,i) => {
+      t.classList.toggle('now', (st.now || []).includes(i+1));
+      t.classList.toggle('focus', (D.stream.focus || []).includes(i+1));
+    });
+    let bi = 0;
+    document.getElementById('pair').innerHTML = D.arms.map(arm => {
+      const blocks = (st.cols[arm.key] || []);
+      const inner = blocks.map(b => {
+        if (b.type === 'mem') return memBlock(b, showDiff);
+        if (b.type === 'outcome') return outcome(b);
+        if (b.type === 'act') return actBlock(b, bi++);
+        if (b.type === 'raw') return rawBlock(b);
+        if (b.type === 'text') return textBlock(b);
+        return '';
+      }).join('');
+      return '<div class="col ' + arm.key + '"><div class="col-head"><span class="arm">' + esc(arm.name) + '<small>' + esc(arm.sub) + '</small></span>' +
+        '<span class="task">' + esc((st.head || {})[arm.key] || '') + '</span></div>' + inner + '</div>';
+    }).join('');
+    document.querySelectorAll('[data-act]').forEach(btn => btn.addEventListener('click', () => {
+      const box = document.getElementById('act-' + btn.dataset.act);
+      const ds = box.querySelectorAll('details.turn');
+      const allOpen = Array.from(ds).every(d => d.open);
+      ds.forEach(d => d.open = !allOpen);
+      btn.textContent = allOpen ? 'expand all' : 'collapse all';
+    }));
+    document.querySelectorAll('pre.obs.end').forEach(p => { p.scrollTop = p.scrollHeight; });
+    document.getElementById('prev').disabled = cur === 0;
+    document.getElementById('next').disabled = cur === D.stages.length - 1;
+    store.set('case-step:' + P.id + ':' + D.id, String(cur));
+  }
+
+  function renderExample(){
+    const D = EX[ex];
+    document.querySelectorAll('.tab-btn').forEach((b,i) => { b.setAttribute('aria-selected', i===ex ? 'true':'false'); b.tabIndex = i===ex ? 0 : -1; });
+    document.getElementById('h2').textContent = D.heading;
+    document.getElementById('lede').innerHTML = D.lede;
+    document.getElementById('foot').innerHTML = D.footer;
+    document.getElementById('wrap').classList.toggle('single', D.arms.length === 1);
+    document.getElementById('pair').style.setProperty('--cols', D.arms.length);
+    // stream strip
+    const ticks = document.getElementById('ticks'); ticks.innerHTML = '';
+    let i = 0;
+    D.stream.segments.forEach((seg, si) => {
+      for (let k = 0; k < seg.n; k++) {
+        i++;
+        const cell = document.createElement('span'); cell.className = 'tcell';
+        const t = document.createElement('span');
+        t.className = 'tick' + (si === 1 ? ' b' : '');
+        t.title = D.stream.unit + ' ' + i + (seg.label ? ' (' + seg.label + ')' : '') + (D.stream.values ? ', ' + D.stream.valuesLabel + ' ' + D.stream.values[i-1] : '');
+        cell.appendChild(t);
+        if (D.stream.values) { const v = document.createElement('span'); v.className = 'tval'; v.textContent = D.stream.values[i-1]; cell.appendChild(v); }
+        ticks.appendChild(cell);
+      }
+    });
+    let legend = D.stream.segments.map((seg, si) => '<span><i class="sw" style="background:var(' + (si === 1 ? '--repo-b' : '--repo-a') + ')"></i>' + esc(seg.legend) + '</span>').join('');
+    legend += '<span><i class="sw" style="background:var(--mem)"></i>' + esc(D.stream.unit) + ' shown on this page</span>';
+    if (D.stream.values) legend += '<span>numbers: ' + esc(D.stream.valuesLabel) + '</span>';
+    document.getElementById('stream-legend').innerHTML = legend;
+    document.getElementById('hl-legend').innerHTML = D.legend.map(l =>
+      '<span><mark class="' + l.kind + '">&nbsp;' + (l.kind === 'know' ? 'purple' : 'amber') + '&nbsp;</mark> ' + esc(l.label) + '</span>').join('');
+    // stepper
+    const stepper = document.getElementById('stepper'); stepper.innerHTML = '';
+    stepper.style.gridTemplateColumns = 'repeat(' + D.stages.length + ',minmax(0,1fr))';
+    D.stages.forEach((st,k) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'step-btn'; b.id = 'step-' + k; b.setAttribute('role','tab');
+      b.innerHTML = '<span class="n">step ' + (k+1) + '</span><span class="t">' + esc(st.title) + '</span>';
+      b.addEventListener('click', () => go(k));
+      stepper.appendChild(b);
+    });
+    const saved = parseInt(store.get('case-step:' + P.id + ':' + D.id), 10);
+    cur = (saved >= 0 && saved < D.stages.length) ? saved : 0;
+    renderStage();
+  }
+
+  function go(k){ cur = Math.max(0, Math.min(EX[ex].stages.length-1, k)); renderStage(); }
+  function selectExample(k, push){
+    ex = Math.max(0, Math.min(EX.length-1, k));
+    if (push) { try { history.replaceState(null, '', '#' + EX[ex].id); } catch(e) {} }
+    renderExample();
+  }
+
+  // static parts
+  document.title = P.title;
+  document.getElementById('h1').textContent = P.title;
+  document.getElementById('page-lede').innerHTML = P.lede || '';
+  const tabs = document.getElementById('tabs');
+  if (EX.length < 2) tabs.hidden = true;
+  EX.forEach((D,k) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'tab-btn'; b.id = 'tab-' + k; b.setAttribute('role','tab');
+    b.textContent = D.tab;
+    b.addEventListener('click', () => selectExample(k, true));
+    tabs.appendChild(b);
+  });
+  tabs.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') { selectExample(ex+1, true); document.getElementById('tab-'+ex).focus(); e.preventDefault(); }
+    if (e.key === 'ArrowLeft') { selectExample(ex-1, true); document.getElementById('tab-'+ex).focus(); e.preventDefault(); }
+  });
+  document.getElementById('stepper').addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') { go(cur+1); document.getElementById('step-'+cur).focus(); e.preventDefault(); }
+    if (e.key === 'ArrowLeft') { go(cur-1); document.getElementById('step-'+cur).focus(); e.preventDefault(); }
+  });
+  document.getElementById('prev').addEventListener('click', () => go(cur-1));
+  document.getElementById('next').addEventListener('click', () => go(cur+1));
+  document.getElementById('hl').addEventListener('change', renderStage);
+  document.getElementById('diff').addEventListener('change', renderStage);
+  document.addEventListener('toggle', e => {
+    const d = e.target;
+    if (d.matches && d.matches('details.turn') && d.open) d.querySelectorAll('pre.obs.end').forEach(p => { p.scrollTop = p.scrollHeight; });
+  }, true);
+  window.addEventListener('hashchange', () => {
+    const k = EX.findIndex(D => '#' + D.id === location.hash);
+    if (k >= 0 && k !== ex) selectExample(k, false);
+  });
+  const h = EX.findIndex(D => '#' + D.id === location.hash);
+  selectExample(h >= 0 ? h : 0, false);
+})();
+</script>
+</body>
+</html>
