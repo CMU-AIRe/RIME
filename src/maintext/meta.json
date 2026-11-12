@@ -1,0 +1,15 @@
+{
+  "title": "How to Train Memory Writing for Continual Learning",
+  "subtitle": "",
+  "description": "How to Train Memory Writing for Continual Learning.",
+  "authors": [
+    { "name": "Author One*", "affiliation": ["Carnegie Mellon University"], "url": "https://example.com" },
+    { "name": "Author Two*", "affiliation": ["Carnegie Mellon University"] },
+    { "name": "Author Three", "affiliation": ["Carnegie Mellon University", "Another Institute"] }
+  ],
+  "affiliations": ["Carnegie Mellon University", "Another Institute"],
+  "notes": ["* Equal contribution"],
+  "date": "November 2026",
+  "github_url": "",
+  "logo": null
+}

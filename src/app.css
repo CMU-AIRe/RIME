@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Body text uses a system serif stack (see body below); no webfonts are shipped.
+   The reference template declared IBM Plex Sans / Newsreader @font-face rules
+   that nothing used, so they were dropped together with the font files. */
+
+@layer base {
+  hr {
+    @apply border-neutral-200;
+  }
+}
+
+@layer components {
+  .link {
+    @apply underline underline-offset-[3px] decoration-neutral-400;
+    @apply hover:text-black hover:decoration-black transition-colors;
+  }
+  .link-no-underline {
+    @apply decoration-neutral-400;
+    @apply hover:text-black hover:decoration-black transition-colors hover:underline hover:underline-offset-[3px];
+  }
+
+  .layout-md {
+    @apply max-w-[780px] mx-auto px-4 sm:px-6;
+  }
+
+  /* Wider container for pages that render a right-side footnote/citation margin. */
+  .layout-xl {
+    @apply max-w-[1200px] mx-auto px-4 sm:px-6;
+  }
+
+  .heading2 {
+    @apply text-black text-xl font-semibold mb-4;
+  }
+}
+
+html {
+  @apply motion-safe:scroll-smooth;
+}
+
+:root {
+  /* Shared horizontal gap between main text and side columns (TOC / footnotes). */
+  --side-gap: 46px;
+  /* Fine-tuned gaps for left TOC and right footnotes. */
+  --toc-gap: 44px;
+  --footnote-gap: 38px;
+  /* Minimum vertical gap between footnote items in the side column. */
+  --footnote-item-gap: 28px;
+  /* Minimum gap between the TOC and the viewport left edge (useful under zoom). */
+  --toc-min-left: 18px;
+}
+
+body {
+  @apply /* antialiased */
+  py-12 sm:py-24 md:py-32 text-neutral-700;
+  font-family: "Iowan Old Style BT", "Iowan Old Style", "Palatino Linotype", Palatino, serif;
+  font-size: 17.7px;
+  line-height: 1.7;
+  letter-spacing: 0.025em;
+}
+
+.font-serif {
+  font-family: "Iowan Old Style BT", "Iowan Old Style", "Palatino Linotype", Palatino, serif;
+}
+
+::selection {
+  @apply bg-sky-100;
+}
+
+@media screen and (min-width: 960px) {
+  html {
+    margin-left: calc(100vw - 100%);
+    margin-right: 0;
+  }
+}
+
+.unselectable {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+hr {
+  @apply border-neutral-300;
+}
+
