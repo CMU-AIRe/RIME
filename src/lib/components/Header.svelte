@@ -21,70 +21,74 @@
   const hasStar = (name: string) => /\*$/.test(name);
 </script>
 
-<header
-  class="layout-xl justify-between items-start"
-  data-sveltekit-noscroll
-  data-sveltekit-preload-code="eager"
->
+<header class="layout-xl" data-sveltekit-noscroll data-sveltekit-preload-code="eager">
   <div class="header-grid">
-  <div class="header-inner mb-8">
-    <h1 class="title-font font-bold text-black text-3xl mb-4 leading-tight">
-      {meta.title ?? ""}
-    </h1>
-    {#if meta.subtitle}
-      <p class="subtitle text-neutral-600 mb-4">{meta.subtitle}</p>
-    {/if}
-
-    <div class="meta text-black">
-      {#if meta.authors?.length}
-        <div class="authors">
-          {#each meta.authors as author, i (i)}
-            <span class="author">
-              {#if author.url}
-                <a class="author-name link-no-underline" href={author.url} target="_blank" rel="noopener noreferrer"
-                  >{stripStar(author.name)}</a
-                >
-              {:else}
-                <span class="author-name">{stripStar(author.name)}</span>
-              {/if}
-              {#if (numbered && affilNums(author).length) || hasStar(author.name)}
-                <sup class="affil-sup"
-                  >{numbered ? affilNums(author).join(",") : ""}{hasStar(author.name) ? "*" : ""}</sup
-                >
-              {/if}
-            </span>
-          {/each}
-        </div>
+    <div class="header-inner">
+      <h1 class="title">{meta.title ?? ""}</h1>
+      {#if meta.subtitle}
+        <p class="subtitle">{meta.subtitle}</p>
       {/if}
 
-      {#if affiliations.length}
-        <div class="affiliations">
-          {#each affiliations as line, i (i)}
-            <span class="affiliation-item">
-              {#if numbered}<sup>{i + 1}</sup>{/if}{line}
-            </span>
-          {/each}
-        </div>
-      {/if}
+      <!-- Byline: small-caps labels over values, between two hairlines. -->
+      <dl class="byline">
+        {#if meta.authors?.length}
+          <div class="byline-col byline-authors">
+            <dt>{meta.authors.length > 1 ? "Authors" : "Author"}</dt>
+            <dd>
+              <ul class="author-list">
+                {#each meta.authors as author, i (i)}
+                  <li class="author">
+                    {#if author.url}
+                      <a class="author-name" href={author.url} target="_blank" rel="noopener noreferrer"
+                        >{stripStar(author.name)}</a
+                      >
+                    {:else}
+                      <span class="author-name">{stripStar(author.name)}</span>
+                    {/if}
+                    {#if (numbered && affilNums(author).length) || hasStar(author.name)}
+                      <sup class="affil-sup"
+                        >{numbered ? affilNums(author).join(",") : ""}{hasStar(author.name) ? "*" : ""}</sup
+                      >
+                    {/if}
+                  </li>
+                {/each}
+              </ul>
+            </dd>
+          </div>
+        {/if}
+
+        {#if affiliations.length}
+          <div class="byline-col">
+            <dt>{affiliations.length > 1 ? "Affiliations" : "Affiliation"}</dt>
+            <dd>
+              {#each affiliations as line, i (i)}
+                <div class="affiliation-item">{#if numbered}<sup>{i + 1}</sup>{/if}{line}</div>
+              {/each}
+            </dd>
+          </div>
+        {/if}
+
+        {#if meta.date}
+          <div class="byline-col">
+            <dt>Published</dt>
+            <dd>{meta.date}</dd>
+          </div>
+        {/if}
+
+        {#if meta.github_url}
+          <div class="byline-col">
+            <dt>Code</dt>
+            <dd><a class="code-link" href={meta.github_url} target="_blank" rel="noopener noreferrer">GitHub</a></dd>
+          </div>
+        {/if}
+      </dl>
 
       {#if meta.notes?.length}
-        <div class="notes">
-          {#each meta.notes as note, i (i)}
-            <span class="note-item">{note}</span>
-          {/each}
-        </div>
-      {/if}
-
-      {#if meta.date || meta.github_url}
-        <div class="date">
-          {#if meta.date}<span>{meta.date}</span>{/if}
-          {#if meta.github_url}
-            <a class="link ml-3" href={meta.github_url} target="_blank" rel="noopener noreferrer">Code</a>
-          {/if}
-        </div>
+        <p class="notes">
+          {#each meta.notes as note, i (i)}<span class="note-item">{note}</span>{/each}
+        </p>
       {/if}
     </div>
-  </div>
   </div>
 </header>
 
@@ -100,11 +104,13 @@
   .header-inner {
     grid-column: 2;
     min-width: 0;
+    padding-top: 56px;
+    margin-bottom: 2.5rem;
   }
   /* Narrow screens / TOC hidden: one centred column, like the article. */
   @media (max-width: 1024px) {
     .header-grid { grid-template-columns: minmax(0, 1fr); }
-    .header-inner { grid-column: 1; width: 100%; max-width: 760px; justify-self: center; }
+    .header-inner { grid-column: 1; width: 100%; max-width: 760px; justify-self: center; padding-top: 24px; }
   }
   :global(html[data-sidecols="off"]) .header-grid { grid-template-columns: minmax(0, 1fr); }
   :global(html[data-sidecols="off"]) .header-inner {
@@ -114,37 +120,76 @@
     justify-self: center;
   }
 
-  .title-font {
+  .title {
     font-family: "Iowan Old Style BT", "Iowan Old Style", "Palatino Linotype", Palatino, serif;
+    font-weight: 700;
+    font-size: clamp(1.9rem, 1.2rem + 2vw, 2.6rem);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: #111;
+    margin: 0 0 0.6rem;
   }
 
   .subtitle {
     font-size: 1.15rem;
     line-height: 1.5;
+    color: #4b5563;
+    margin: 0 0 0.5rem;
   }
 
-  .meta {
+  /* --- byline ------------------------------------------------------------------- */
+  .byline {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 3.5rem;
+    row-gap: 1rem;
+    margin: 1.5rem 0 0;
+    padding: 1rem 0 1.1rem;
+    border-top: 1px solid #e5e7eb;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .byline dt {
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: #6b7280;
+    margin-bottom: 0.35rem;
+  }
+
+  .byline dd {
+    margin: 0;
     font-size: 16px;
     line-height: 1.55;
+    color: #111827;
   }
 
-  .authors {
-    font-size: 16px;
-    line-height: 2;
-    text-align: left; /* same alignment as the title and the date */
+  .author-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
   }
 
   .author {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 1px;
-    margin-right: 8px;
-    margin-bottom: 4px;
     white-space: nowrap;
   }
 
   .author-name {
-    line-height: 1.4;
+    color: inherit;
+    text-decoration: none;
+  }
+  a.author-name:hover,
+  .code-link:hover {
+    color: #c41230; /* Carnegie Red */
+  }
+
+  .code-link {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: #d1d5db;
+    text-underline-offset: 3px;
   }
 
   .affil-sup {
@@ -152,33 +197,21 @@
     margin-left: 1px;
   }
 
-  .affiliations,
   .notes {
-    margin-top: 10px; /* visual separation from authors */
-    color: #111827;
-    opacity: 0.9;
-    text-align: left;
+    margin: 0.5rem 0 0;
+    font-size: 13px;
+    color: #6b7280;
   }
-
-  .notes {
-    margin-top: 2px;
-    font-size: 14px;
-  }
-
-  .affiliation-item,
-  .note-item {
-    display: inline-block;
-    margin: 0 16px 0 0;
-  }
-
-  .date {
-    margin-top: 10px;
-    color: #111827;
-    opacity: 0.9;
+  .note-item + .note-item {
+    margin-left: 1rem;
   }
 
   @media (max-width: 580px) {
-    .meta {
+    .byline {
+      flex-direction: column;
+      row-gap: 0.75rem;
+    }
+    .byline dd {
       font-size: 15px;
     }
   }

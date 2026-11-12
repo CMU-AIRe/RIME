@@ -52,29 +52,31 @@
 <Footer />
 
 <style lang="postcss">
+  /* Top-right institution wordmark (meta.logo). */
   .page-upper-right-inline {
     position: absolute;
-    top: 3px;
-    right: 16px;
+    top: 22px;
+    right: 28px;
     display: flex;
     justify-content: flex-end;
     pointer-events: none;
   }
 
   .page-upper-right {
-    width: clamp(220px, 18vw, 320px);
+    width: clamp(96px, 7.5vw, 124px);
     height: auto;
     pointer-events: none;
   }
 
-  @media (max-width: 720px) {
+  /* Narrow screens: keep it in the flow above the title so it never covers text. */
+  @media (max-width: 1024px) {
     .page-upper-right-inline {
-      top: 4px;
-      right: 4px;
+      position: static;
+      padding: 14px 18px 0;
     }
 
     .page-upper-right {
-      width: clamp(140px, 30vw, 220px);
+      width: 84px;
     }
   }
 </style>
