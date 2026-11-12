@@ -173,6 +173,7 @@ details.act-c[open] > summary .tw::before{content:"▾ "}
   border:1px solid var(--rule); border-radius:999px; padding:5px 14px; cursor:pointer}
 .tab-btn[aria-selected="true"]{color:var(--ink); border-color:var(--mem); background:var(--mem-soft)}
 .tab-btn:focus-visible{outline:2px solid var(--mem); outline-offset:2px}
+.tabnote{margin:-8px 0 0; font-size:13.5px; color:var(--muted); max-width:90ch}
 .example{display:grid; gap:22px}
 h2{font-family:var(--f-display); font-weight:700; letter-spacing:-.005em; font-size:clamp(19px,2.4vw,23px); line-height:1.25; margin:0; text-wrap:balance}
 .tcell{flex:1 1 0; min-width:6px; display:flex; flex-direction:column; gap:3px; align-items:stretch}
@@ -201,6 +202,7 @@ h2{font-family:var(--f-display); font-weight:700; letter-spacing:-.005em; font-s
   </header>
 
   <nav class="tabs" role="tablist" aria-label="Examples" id="tabs"></nav>
+  <p class="tabnote" id="tabnote" hidden></p>
 
   <section class="example" id="example">
     <header>
@@ -426,6 +428,9 @@ h2{font-family:var(--f-display); font-weight:700; letter-spacing:-.005em; font-s
   document.getElementById('page-lede').innerHTML = P.lede || '';
   const tabs = document.getElementById('tabs');
   if (EX.length < 2) tabs.hidden = true;
+  const tabnote = document.getElementById('tabnote');
+  tabnote.innerHTML = P.tabnote || '';
+  tabnote.hidden = !P.tabnote || EX.length < 2;
   EX.forEach((D,k) => {
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'tab-btn'; b.id = 'tab-' + k; b.setAttribute('role','tab');
