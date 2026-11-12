@@ -4,5 +4,5 @@
 # Lines starting with # are ignored.
 useful memories require informative experience.
 order training tasks from easy to medium to hard
-[section] Experiments
+[section] Results
 [section] Case Stud
