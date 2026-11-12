@@ -309,7 +309,7 @@ Several natural follow-up questions remain. How far can learned memory-writing s
 
 We thank Anikait Singh, Apurva Gandhi, Violet Xiang and Hao Bai for helpful discussions and feedback on an earlier version of this post. We thank the CMU FLAME center for providing the GPU resources that supported this work.
 
-## Appendices
+## Appendices: Case Studies
 
 ### A. What an untrained writer passes on
 
