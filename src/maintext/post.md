@@ -118,7 +118,7 @@ Third, the stream of tasks must create both an opportunity and a need to use mem
 
 :::fold_begin title="Symbolic Alchemy: environment and metrics":::
 
-![](assets/figures/fig06_alchemy_chemistry.png "*Figure 6.* **An example chemistry in Symbolic Alchemy.** Each node is a stone, described by its shape, size and color, and labeled with its value. Each colored arrow is a potion, which changes one of these properties."){style=width:min(480px,100%)}
+![](assets/figures/fig06_alchemy_chemistry.png "*Figure 6.* **An example chemistry in Symbolic Alchemy.** Each node is a stone, described by its shape, size and color, and labeled with its value. Each colored arrow is a potion, which changes one of these properties."){style=width:min(380px,100%)}
 
 <strong class="md-runin">1)</strong> [**Symbolic Alchemy**](https://arxiv.org/abs/2102.02926)[**.**](https://arxiv.org/abs/2102.02926) *Symbolic Alchemy* is a toy environment in which the knowledge to be identified by solving a stream of tasks is the hidden set of rules that underlie the environment. In each task, the agent receives a fresh set of stones and potions. As shown in Figure 6, applying a potion to a stone changes the stone's properties (color, size or shape); placing a stone in the cauldron adds its value to the score. The goal of each task is to maximize this score, and the agent can see the current value of every stone but not the rules that change it. A hidden chemistry determines these transformations and values. The chemistry stays fixed across a stream of 10 tasks and is resampled between streams, so rules found in early tasks hold for the rest of the stream but do not carry over to other streams.
 
