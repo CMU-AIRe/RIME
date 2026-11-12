@@ -1,0 +1,4 @@
+# One passage per line, exactly as it is bolded in Notion (the text between the ** markers).
+# postprocess.py keeps each of these bold but in the normal ink colour instead of Carnegie Red.
+# Lines starting with # are ignored.
+useful memories require informative experience.

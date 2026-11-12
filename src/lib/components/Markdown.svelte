@@ -1460,14 +1460,15 @@
   /* Highlighted (bold) text in running prose is coloured, like the ::blue[]:: highlights
      of the reference post, in CMU red (Carnegie Red #C41230). Captions, coloured spans, tables, headings and
      short run-in labels (<strong class="md-runin">, added by scripts/notion/postprocess.py)
-     keep the normal ink colour. */
+     and passages listed in scripts/notion/plain.txt (<strong class="md-plain">) keep the normal ink colour. */
   :global(.md-output p strong),
   :global(.md-output li strong) {
     color: var(--md-highlight, #c41230); /* Carnegie Red */
   }
   :global(.md-output .md-figcaption strong),
   :global(.md-output span[style*="color"] strong),
-  :global(.md-output strong.md-runin) {
+  :global(.md-output strong.md-runin),
+  :global(.md-output strong.md-plain) {
     color: inherit;
   }
   :global(.md-output em) {

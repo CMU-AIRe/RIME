@@ -104,6 +104,19 @@ if os.path.exists(hl_path):
         post = post[:m.start()] + '**' + m.group(0).replace('**', '') + '**' + post[m.end():]
         print('highlighted:', passage[:60])
 
+# --- 2b'. bold passages that stay black (scripts/notion/plain.txt) ----------------------
+pl_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'plain.txt')
+if os.path.exists(pl_path):
+    for passage in (l.strip() for l in open(pl_path)):
+        if not passage or passage.startswith('#'):
+            continue
+        bold = '**' + passage + '**'
+        if bold not in post:
+            print('WARNING: plain-bold passage not found:', passage[:60])
+            continue
+        post = post.replace(bold, f'<strong class="md-plain">{passage}</strong>', 1)
+        print('plain bold:', passage[:60])
+
 # --- 2c. case-study iframes size themselves to their content ---------------------------
 post, n = re.subn(r'<iframe src="(case-studies/[^"]+)" loading="lazy" style="width:100%;height:720px;',
                   r'<iframe src="\1" data-autoheight loading="lazy" style="width:100%;height:720px;', post)
