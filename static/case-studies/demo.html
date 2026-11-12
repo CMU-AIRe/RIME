@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Demo case study</title>
+<style>
+  body { margin: 0; padding: 16px 18px; font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; color: #1f2937; background: #fff; }
+  h1 { font-size: 17px; margin: 0 0 8px; }
+  .step { border: 1px solid #e5e7eb; border-radius: 6px; padding: 8px 12px; margin: 8px 0; }
+  .step b { color: #0B6E99; }
+  button { font: inherit; padding: 4px 10px; border: 1px solid #cbd5e1; border-radius: 4px; background: #f8fafc; cursor: pointer; }
+  #more { display: none; }
+</style>
+</head>
+<body>
+  <h1>Demo case study (static/case-studies/demo.html)</h1>
+  <p>A stand-alone HTML page served as-is from <code>static/</code> and embedded with an iframe.</p>
+  <div class="step"><b>Step 1.</b> Lorem ipsum dolor sit amet, consectetur adipiscing elit.</div>
+  <div class="step"><b>Step 2.</b> Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</div>
+  <button onclick="var m=document.getElementById('more');m.style.display=m.style.display==='block'?'none':'block'">Toggle more</button>
+  <div id="more" class="step"><b>Step 3.</b> Ut enim ad minim veniam, quis nostrud exercitation.</div>
+</body>
+</html>
