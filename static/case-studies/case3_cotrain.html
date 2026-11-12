@@ -118,6 +118,8 @@ body.nohl mark{background:none; text-decoration:none}
 .scores-val{font-family:var(--f-display); font-weight:700; font-size:28px; line-height:1; color:var(--mem); font-variant-numeric:tabular-nums}
 .scores-val.bad{color:var(--bad)}
 .sc-row{display:flex; justify-content:space-between; align-items:center; gap:12px; padding:4px 0; font-size:13.5px}
+.sc-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); column-gap:32px}
+.topblocks{display:grid; gap:12px}
 .sc-row b{font-weight:600; font-variant-numeric:tabular-nums; white-space:nowrap}
 .dots{display:inline-flex; gap:4px; margin-right:8px; vertical-align:-1px}
 .dots i{width:11px; height:11px; border-radius:50%; border:1.5px solid var(--mem); box-sizing:border-box}
@@ -233,6 +235,8 @@ h2{font-family:var(--f-display); font-weight:700; letter-spacing:-.005em; font-s
 
     <div class="legend" id="hl-legend"></div>
 
+    <div class="topblocks" id="topblocks" hidden></div>
+
     <div class="pair" id="pair"></div>
 
     <footer class="foot" id="foot"></footer>
@@ -316,7 +320,7 @@ h2{font-family:var(--f-display); font-weight:700; letter-spacing:-.005em; font-s
       const dots = Array.from({length: it.max}, (_, k) => '<i class="' + (k < it.score ? 'on' : '') + '"></i>').join('');
       return '<div class="sc-row"><span>' + esc(it.label) + '</span><b><span class="dots" aria-hidden="true">' + dots + '</span>' + it.score + ' of ' + it.max + '</b></div>';
     }).join('');
-    return '<div class="scores"><div class="scores-top"><span>' + esc(b.label) + '</span><span class="scores-val' + (b.cls === 'bad' ? ' bad' : '') + '">' + esc(b.value) + '</span></div>' + rows + '</div>';
+    return '<div class="scores"><div class="scores-top"><span>' + esc(b.label) + '</span><span class="scores-val' + (b.cls === 'bad' ? ' bad' : '') + '">' + esc(b.value) + '</span></div><div class="sc-grid">' + rows + '</div></div>';
   }
 
   function rawBlock(b){
@@ -342,6 +346,9 @@ h2{font-family:var(--f-display); font-weight:700; letter-spacing:-.005em; font-s
       t.classList.toggle('focus', (D.stream.focus || []).includes(i+1));
     });
     let bi = 0;
+    const top = document.getElementById('topblocks');
+    top.innerHTML = (st.top || []).map(b => b.type === 'scores' ? scoresBlock(b) : b.type === 'outcome' ? outcome(b) : '').join('');
+    top.hidden = !(st.top || []).length;
     document.getElementById('pair').innerHTML = D.arms.map(arm => {
       const blocks = (st.cols[arm.key] || []);
       const inner = blocks.map(b => {
