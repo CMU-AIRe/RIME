@@ -63,7 +63,7 @@
   }
 
   .page-upper-right {
-    width: clamp(96px, 7.5vw, 124px);
+    width: clamp(140px, 11vw, 180px);
     height: auto;
     pointer-events: none;
   }
@@ -76,7 +76,7 @@
     }
 
     .page-upper-right {
-      width: 84px;
+      width: 112px;
     }
   }
 </style>
