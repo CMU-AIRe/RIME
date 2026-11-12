@@ -56,7 +56,7 @@ $$
 \displaystyle R_t^{\mathrm{WRITE}} = g_t \left(\bar{r} _{t+1:t+K} - \bar{r} _{t-K+1:t}\right), \qquad t<T,
 $$
 
-where $\bar{r} _{a:b}$ is the mean task reward over tasks in positions $a$ to $b$ of the stream. The subtracted term is not a constant baseline shared across rollouts. Because the siblings in each group (Figure 4) reach position $t$ with different histories, the value of this term differs among them, so each memory is credited for the change it brings about rather than for the starting point it inherited. We discuss how to use this reward with GRPO-style RL later in this blog post. The horizon $K$ determines how far ahead a memory is credited. A short horizon credits $M_t$ only for what it does for the next few tasks and misses knowledge that pays off later. A long horizon counts tasks that are increasingly shaped by memories written after $M_t$, which blurs the credit given to $M_t$. We keep $K$ relatively short compared with the length of a stream, so that each memory receives a clear credit. That said, the value of $K$ cannot be very short: as such we will see that very short task streams during training do not enable us to learn to write memory effectively. The indicator $g_t\in\{0,1\}$ requires the memory to be well formed, which keeps degenerate outputs from collecting the downstream term.
+where $\bar{r} _{a:b}$ is the mean task reward over tasks in positions $a$ to $b$ of the stream. The subtracted term is not a constant baseline shared across rollouts. Because the siblings in each group (Figure 4) reach position $t$ with different histories, the value of this term differs among them, so each memory is credited for the change it brings about rather than for the starting point it inherited. We discuss how to use this reward with GRPO-style RL later in this blog post. The horizon $K$ determines how far ahead a memory is credited. A short horizon credits $M_t$ only for what it does for the next few tasks and misses knowledge that pays off later. A long horizon counts tasks that are increasingly shaped by memories written after $M_t$, which blurs the credit given to $M_t$. We keep $K$ relatively short compared with the length of a stream, so that each memory receives a clear credit. That said, $K$ cannot be too small, and as we will see, very short training streams do not allow the writer to learn to write memory effectively. The indicator $g_t\in\{0,1\}$ requires the memory to be well formed, which keeps degenerate outputs from collecting the downstream term.
 
 ### The actor must also be trained to explore
 
@@ -196,7 +196,7 @@ We compare our method on Codebase Adaptation with the base model, frontier model
 
 ::gray[*Table 1.* **Main results on Codebase Adaptation.** Each system's cumulative gain is measured against its own stateless run. While not an apples-to-apples comparison, observe that the cumulative gain from our approach is similar to that of GPT-6 Astra and far superior to any other method applied onto our base model, Qwen3.5-4B. (\* denotes results taken directly from the Continual Learning Bench ]::[::gray[leaderboard]::](https://continual-learning-bench.com/leaderboard.html)::gray[).]::
 
-<strong class="md-plain">Training memory writing brings a 4B model to the level of frontier models.</strong> Our method raises the cumulative reward of Qwen3.5-4B from nearly zero to that of GPT-5.4 and Claude Opus 4.7 with in-context learning, and well above prior methods CoD and [SkillRise](https://arxiv.org/abs/2607.26784) trained in the same setting. While not directly comparable, our approach attains a cumulative gain from memory writing that roughly matches GPT-6 Astra and is only below GPT-5.6 Sol.
+<strong class="md-plain">Training memory writing brings a 4B model to the level of frontier models.</strong> Our method raises the cumulative reward of Qwen3.5-4B from nearly zero to that of GPT-5.4 and Claude Opus 4.7 with in-context learning, and well above prior methods CoD and [SkillRise](https://arxiv.org/abs/2607.26784) trained in the same setting. While not directly comparable, our approach attains a cumulative gain from memory writing that roughly matches that of GPT-6 Astra and is below only that of GPT-5.6 Sol.
 
 <strong class="md-plain">Solving more tasks is not the same as learning from earlier ones.</strong> Cumulative reward and cumulative gain rank the frontier models differently. Claude Opus 5.5 reaches the highest reward in the table but gains little from its history, while both Gemini models do worse with their history than without it. A model can be strong on the immediate task and still extract little from its past experience, which is why we report this gain metric alongside reward.
 
@@ -230,7 +230,7 @@ Having established that the writer must be trained, we ask how it should be trai
 
 ![](assets/figures/fig08_writer_training.png "Figure 8. ***Effect of writer training on performance***, with the actor trained the same way in every case. Top: performance and cumulative reward. Bottom: improvement and cumulative gain.")
 
-We compare trained and untrained writers on both domains. As shown in Figure 8, both the overall performance and the benefit from memory are substantially higher when the writer is trained, as discussed above in Q1. In some of our early experiments, we observed that untrained memories tended to violate [formats](#writers-trained-without-the-improvement-reward), and we suspected that this led to poor downstream benefits from memory. To test this hypothesis, we also trained a memory writer with a generic format reward only, agnostic of the improvement that the underlying memory brings about. On Codebase Adaptation, adhering to a fixed memory format does slightly improve cumulative reward, but does not improve cumulative gain. Producing well-formed memory is therefore insufficient; the training signal must reflect its usefulness for later tasks, as ours does.
+We compare trained and untrained writers on both domains. As shown in Figure 8, both the overall performance and the benefit from memory are substantially higher when the writer is trained, as discussed above in Q1. In some of our early experiments, we observed that untrained memories tended to violate [formats](#b-writers-trained-without-the-improvement-reward), and we suspected that this led to poor downstream benefits from memory. To test this hypothesis, we also trained a memory writer with a generic format reward only, agnostic of the improvement that the underlying memory brings about. On Codebase Adaptation, adhering to a fixed memory format does slightly improve cumulative reward, but does not improve cumulative gain. Producing well-formed memory is therefore insufficient; the training signal must reflect its usefulness for later tasks, as ours does.
 
 ### **Q3. Does effective memory writing need the actor to explore? And how do exploration dynamics look through training?**
 
@@ -242,9 +242,9 @@ The writer learns from the actor’s experience. We therefore test how the actor
 
 ![](assets/figures/fig10_exploration_scores.png "*Figure 10.* **Exploration scores during training**, with (red) and without (blue) the exploration reward, and with a trained (solid) or untrained (dashed) writer.")
 
-<strong class="md-plain">Our method sustains [exploration](#what-exploration-leaves-in-memory) while learning to write more useful memories.</strong> We next visualize how the exploration score evolves over the course of training on the training task streams. As shown in Figure 10, the exploration score remains roughly constant throughout training, which may seem surprising given that we explicitly optimize it. However, joint training creates two opposing effects. As the writer improves during training, it becomes harder for the actor to find useful information beyond what the memory already contains. The exploration reward encourages the actor to keep seeking such information. A stable score is therefore consistent with the actor keeping pace with an improving writer.
+<strong class="md-plain">Our method sustains [exploration](#d-what-exploration-leaves-in-memory) while learning to write more useful memories.</strong> We next visualize how the exploration score evolves over the course of training on the training task streams. As shown in Figure 10, the exploration score remains roughly constant throughout training, which may seem surprising given that we explicitly optimize it. However, joint training creates two opposing effects. As the writer improves during training, it becomes harder for the actor to find useful information beyond what the memory already contains. The exploration reward encourages the actor to keep seeking such information. A stable score is therefore consistent with the actor keeping pace with an improving writer.
 
-Without rewarding the actor for exploration, the score generally declines in Figure 10, suggesting that the actor does not sustain this information gathering on its own. With exploration rewarded but the writer untrained, scores instead rise above ours, yet cumulative reward and cumulative gain remain lower than those of our method. One explanation is the summarization problem described in the method section. An untrained writer tends to [summarize or compress information](#what-an-untrained-writer-passes-on) with a bias toward the latest rollout, potentially overwriting information already present in memory. As a result, almost anything somewhat different the actor encounters on a given task can appear new, whether or not it helps future tasks. Our method’s stable exploration score, together with its stronger performance, suggests a productive balance between discovering new information and learning to preserve it for future tasks.
+Without rewarding the actor for exploration, the score generally declines in Figure 10, suggesting that the actor does not sustain this information gathering on its own. With exploration rewarded but the writer untrained, scores instead rise above ours, yet cumulative reward and cumulative gain remain lower than those of our method. One explanation is the summarization problem described in the method section. An untrained writer tends to [summarize or compress information](#a-what-an-untrained-writer-passes-on) with a bias toward the latest rollout, potentially overwriting information already present in memory. As a result, almost anything somewhat different the actor encounters on a given task can appear new, whether or not it helps future tasks. Our method’s stable exploration score, together with its stronger performance, suggests a productive balance between discovering new information and learning to preserve it for future tasks.
 
 ### **Q4. Does the construction of the training task streams matter?**
 
@@ -264,9 +264,9 @@ Our method trains on deliberately built task streams, and this section studies w
 
 ![](assets/figures/fig12_streams_vs_single_tasks.png "*Figure 12.* **Training on streams versus single tasks**, by position in the repository segment. Left: fraction of samples that pass. Middle: fraction of GRPO groups that produce a gradient. Right: outcomes of the groups at the two hardest positions.")
 
-<strong class="md-plain">Training on single tasks teaches the model to solve tasks but not to carry experience by writing effective memories.</strong> Observe in Table 3 that training with GRPO on a single task at a time improves reward above that of the untrained model but keeps its cumulative gain near zero. In other words, the model learns to solve each task on its own and learns nothing about using one task to help with the next. Using task streams also changes what the training signal looks like on hard tasks, as Figure 12 shows. A model does not attain any reward on a task it cannot solve from scratch, and hence, sees no learning signal, when that task is trained on by itself. Within a stream of tasks, the memory from earlier tasks can bring a hard task within reach, so the same task starts to produce a learning signal.
+<strong class="md-plain">Training on single tasks teaches the model to solve tasks but not to carry experience by writing effective memories.</strong> Observe in Table 3 that training with GRPO on a single task at a time improves reward above that of the untrained model but keeps its cumulative gain near zero. In other words, the model learns to solve each task on its own and learns nothing about using one task to help with the next. Using task streams also changes what the training signal looks like on hard tasks, as Figure 12 shows. When a task is trained on by itself, a model that cannot solve it from scratch attains no reward and hence sees no learning signal. Within a stream of tasks, the memory from earlier tasks can bring a hard task within reach, so the same task starts to produce a learning signal.
 
-<strong class="md-plain">Within a training stream, task order and segment length matter (Table 3).</strong> Shuffling the tasks within each segment, while keeping the repositories and task sets unchanged, lowers cumulative reward and substantially reduces cumulative gain. The easy-to-hard order thus helps make memories written on early tasks useful for later ones. Shortening segments from six tasks to three, while preserving the curriculum order, has an even larger effect. With only three tasks per repository, memory has fewer opportunities to accumulate useful knowledge and improve later performance, weakening the actor’s incentive to use it effectively. Because the actor can simply optimize task progress unless the memory is useful, whenever we are unable to learn to write effective memories, actor training will further inhibit the actor from productively using memories. The resulting model performs close to the single-task baseline. The writer learns what experience is worth retaining when later tasks provide opportunities to use it, and training task streams must therefore give that experience enough relevant tasks to demonstrate its value.
+<strong class="md-plain">Within a training stream, task order and segment length matter (Table 3).</strong> Shuffling the tasks within each segment, while keeping the repositories and task sets unchanged, lowers cumulative reward and substantially reduces cumulative gain. The easy-to-hard order thus helps make memories written on early tasks useful for later ones. Shortening segments from six tasks to three, while preserving the curriculum order, has an even larger effect. With only three tasks per repository, memory has fewer opportunities to accumulate useful knowledge and improve later performance, weakening the actor’s incentive to use it effectively. Unless the memory is useful, the actor can simply optimize task progress, so when the writer fails to learn to write effective memories, actor training further discourages the actor from using memory productively. The resulting model performs close to the single-task baseline. The writer learns what experience is worth retaining when later tasks provide opportunities to use it, and training task streams must therefore give that experience enough relevant tasks to demonstrate its value.
 
 | **Training data** | **Cumulative reward (13 + 13)** | **Cumulative gain (13 + 13)** | **Cumulative reward (9 + 9 + 9)** | **Cumulative gain (9 + 9 + 9)** |
 | --- | --- | --- | --- | --- |
@@ -305,9 +305,13 @@ In this technical post, we presented a simple RL approach that jointly trains a 
 
 Several natural follow-up questions remain. How far can learned memory-writing strategies extrapolate, and how can we integrate this approach into agentic systems? Can we train memory writing similarly when experience does not arrive in clearly defined task streams? What are the tradeoffs between writing memories and updating the model’s parameters? Can similar exploration rewards help multi-agent systems distill useful knowledge from work performed in parallel? More broadly, our findings raise questions about how to balance exploration (i.e., collecting useful experience) and exploitation (i.e., solving tasks) during training. Should today’s models receive explicit exploration training, through rewards or regularization, rather than relying on human-constructed midtraining data or inference-time architectures to produce the right balance? Answering these questions is an interesting avenue for future work.
 
-## Case Study
+## Acknowledgements
 
-### What an untrained writer passes on
+We thank Anikait Singh, Apurva Gandhi, Violet Xiang and Hao Bai for helpful discussions and feedback on an earlier version of this post. We thank the CMU FLAME center for providing the GPU resources that supported this work.
+
+## Appendices
+
+### A. What an untrained writer passes on
 
 <strong class="md-plain">A memory that summarizes the last task does not help with the next one.</strong> In the example below, the untrained writer replaces its memory after each task with a summary of that task, while the trained writer keeps and extends a description of the repository. Only the actor given the trained writer’s memory solves the next task.
 
@@ -315,7 +319,7 @@ Several natural follow-up questions remain. How far can learned memory-writing s
 
 [Open this case study in a new tab](case-studies/case1_summarization.html)
 
-### Writers trained without the improvement reward
+### B. Writers trained without the improvement reward
 
 <strong class="md-plain">Without the improvement reward, the writer passes on memory that later tasks cannot rely on, even when that memory is well formed.</strong> In the examples below, a writer that receives no reward passes on a single test command, and a writer trained only for format leaves out how to submit, so the next actor fixes the bug but never submits the fix.
 
@@ -323,7 +327,7 @@ Several natural follow-up questions remain. How far can learned memory-writing s
 
 [Open this case study in a new tab](case-studies/case2_format.html)
 
-### What the trained writer keeps and revises
+### C. What the trained writer keeps and revises
 
 <strong class="md-plain">The trained writer keeps what the actor’s experience reveals about the environment, revises or generalizes it, and later tasks start from it.</strong> Each tab below follows one memory from the task where it is written to the task that revises or uses it.
 
@@ -331,7 +335,7 @@ Several natural follow-up questions remain. How far can learned memory-writing s
 
 [Open this case study in a new tab](case-studies/case3_cotrain.html)
 
-### What exploration leaves in memory
+### D. What exploration leaves in memory
 
 <strong class="md-plain">When the actor explores, the writer has more to keep, and later tasks build on it.</strong> Each tab below follows one exploratory step of our actor, what the writer keeps from it, and the later task that uses it.
 
@@ -339,17 +343,13 @@ Several natural follow-up questions remain. How far can learned memory-writing s
 
 [Open this case study in a new tab](case-studies/case_explore_payoff.html)
 
-### How the exploration reward scores memory updates
+### E. How the exploration reward scores memory updates
 
 <strong class="md-plain">The exploration reward scores what an update adds to the memory, not how much of its text changes.</strong> In one training stream, an update that records a new fix and a general rule receives 0.875, while one that rewrites every bullet of the previous memory in new words and adds a single detail receives 0.25.
 
 <iframe src="case-studies/case_exploration.html" data-autoheight loading="lazy" style="width:100%;height:720px;border:1px solid #e5e5e5;border-radius:6px"></iframe>
 
 [Open this case study in a new tab](case-studies/case_exploration.html)
-
-## Acknowledgements
-
-We thank Anikait Singh, Apurva Gandhi, Violet Xiang and Hao Bai for helpful discussions and feedback on an earlier version of this post. We thank the CMU FLAME center for providing the GPU resources that supported this work.
 
 ## Citation
 

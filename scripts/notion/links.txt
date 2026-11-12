@@ -1,5 +1,5 @@
 # Internal links added after conversion (applied by postprocess.py). One per line:
 # <passage as it reads in the post, with [square brackets] around the words to link><TAB><#anchor>
-we observed that untrained memories tended to violate [formats]	#writers-trained-without-the-improvement-reward
-Our method sustains [exploration] while learning to write more useful memories.	#what-exploration-leaves-in-memory
-An untrained writer tends to [summarize or compress information]	#what-an-untrained-writer-passes-on
+we observed that untrained memories tended to violate [formats]	#b-writers-trained-without-the-improvement-reward
+Our method sustains [exploration] while learning to write more useful memories.	#d-what-exploration-leaves-in-memory
+An untrained writer tends to [summarize or compress information]	#a-what-an-untrained-writer-passes-on

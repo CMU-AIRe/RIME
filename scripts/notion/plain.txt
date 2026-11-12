@@ -4,4 +4,4 @@
 # Lines starting with # are ignored.
 order training tasks from easy to medium to hard
 [section] Results
-[section] Case Stud
+[section] Appendices
