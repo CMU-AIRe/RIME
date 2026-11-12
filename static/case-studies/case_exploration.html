@@ -69,7 +69,7 @@ code.i{font-family:var(--f-mono); font-size:.88em; background:var(--code-bg); bo
 
 /* columns */
 .pair{display:grid; grid-template-columns:repeat(var(--cols,2),minmax(0,1fr)); gap:18px}
-.col{display:grid; gap:12px; align-content:start; min-width:0}
+.col{display:grid; grid-template-columns:minmax(0,1fr); gap:12px; align-content:start; min-width:0}
 .col-head{display:flex; flex-wrap:wrap; gap:6px 12px; align-items:baseline; justify-content:space-between;
   border-bottom:2px solid var(--rule); padding-bottom:8px}
 .col-head{border-bottom-color:var(--base)}
@@ -85,6 +85,7 @@ code.i{font-family:var(--f-mono); font-size:.88em; background:var(--code-bg); bo
 .pill.ok::before{content:"✓ "}
 .pill.bad{color:var(--bad); background:#EEEBE3; border-color:#B9B2A3}
 .pill.bad::before{content:"✗ "}
+.pill.note{white-space:normal; border-radius:10px}
 
 /* memory */
 .mem{border:1.5px solid var(--mem-line); border-left:4px solid var(--mem); border-radius:8px; background:var(--mem-soft); min-width:0}
