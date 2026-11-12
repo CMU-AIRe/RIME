@@ -1510,7 +1510,9 @@
   }
   :global(.md-output th) {
     @apply text-left font-semibold text-neutral-800;
-    white-space: nowrap;
+    /* Headers may wrap, so tables with long headers (e.g. "Cumulative reward (9 + 9 + 9)")
+       fit the text column instead of scrolling sideways. */
+    white-space: normal;
   }
   :global(.md-output tbody tr:nth-child(even)) {
     @apply bg-neutral-50/50;
