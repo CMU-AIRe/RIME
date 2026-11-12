@@ -40,7 +40,7 @@ To build our approach, **RIME**, we stress that these two roles depend on each o
 
 The most direct approach is to train only the actor, using the task reward $r_t$, and to leave the writer as the untrained model following its prompt. This is standard [multi-turn RL](https://arxiv.org/abs/2503.09516) and is common practice in the community, including [recent work](https://engram.com/blog/learning-in-a-world-of-notes). Multi-turn RL improves how the actor solves each task, but it does not improve what is carried from one task to the next. Since memory is the only channel through which experience from earlier tasks can inform later ones, the writer must identify and retain information that will be useful beyond the current task.
 
-Moreover, training only via task reward leaves memory writing to prompting, much as in compaction-based systems. We might prompt the model to extract useful insights or record parts of its experience for future use, as in a MEMORY.md file. But optimizing reward on the current task does not teach the writer which information will help on later tasks. *The first part of our method therefore explicitly trains the model for memory writing.*
+Moreover, training only via task reward leaves memory writing to prompting, much as in compaction-based systems. We might prompt the model to extract useful insights or record parts of its experience for future use, as in a `MEMORY.md` file. But optimizing reward on the current task does not teach the writer which information will help on later tasks. *The first part of our method therefore explicitly trains the model for memory writing.*
 
 ### Rewarding the writer for the improvement it brings
 
