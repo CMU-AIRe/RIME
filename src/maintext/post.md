@@ -299,21 +299,25 @@ So far we have trained a single model to operate in both the actor and writer ro
 
 ## **Case studies: what does the trained writer write?\[under construction\]**
 
-**A memory that summarizes the last task does not help with the next one.** The example below shows two writers at the same point of a Codebase Adaptation stream, the first two tenacity issues after 9 tablib issues. After task 10, the untrained writer replaces its notes with an account of its unfinished attempt on that issue, whereas the trained writer replaces them with a map of the tenacity package. Task 11 is a different tenacity issue. Starting from the account, the actor clones the upstream repository into a temporary directory, concludes that the issue is already fixed and submits a patch that fails. Starting from the map, the actor opens the relevant module directly, patches it and runs the test suite before submitting, and the patch passes. After task 11, the untrained writer again narrates its attempt, while the trained writer keeps the map and adds the keys of the statistics dictionary it has just fixed.
+**A memory that summarizes the last task does not help with the next one.** In the example below, the untrained writer passes on an account of its unfinished attempt and the trained writer passes on a map of the new repository, and only the actor given the map solves the next task.
 
 <iframe src="case-studies/case1_summarization.html" data-autoheight loading="lazy" style="width:100%;height:720px;border:1px solid #e5e5e5;border-radius:6px"></iframe>
 
 [Open this case study in a new tab](case-studies/case1_summarization.html)
 
-**Without a reward for usefulness, the writer passes on memory that later tasks cannot rely on.** The first example compares two models at the same point of the Codebase Adaptation stream. In one of them only the actor is trained, so its writer receives no reward. After both models fail the first tenacity issue, this writer starts its memory in the actor's output format, copies a line of its own prompt and keeps every earlier tablib note. After the next issue, its entire output is a single test command of 47 characters, which is all the following issue receives. The writer trained with our method turns the same failure into a lesson to run the full test suite before submitting. On the next issue, the actor runs the suite, finds that its initial fix sets the wrong value, corrects it and solves the issue. The second example, from a held-out long stream, uses a writer trained with a format reward only. Its memories always contain the required sections, but after a failed submission it reports that the three tests it ran had all passed and records them as the relevant check. Without any memory, the same model solves that issue in all four attempts. At the same position, our writer records running the full test suite before submitting.
+**Without the improvement reward, the writer passes on memory that later tasks cannot rely on, even when that memory is well formed.** In the examples below, the memory of a writer that receives no reward shrinks to a single test command, and a writer trained with only a format reward reports passing tests after a failed submission.
 
 <iframe src="case-studies/case2_format.html" data-autoheight loading="lazy" style="width:100%;height:720px;border:1px solid #e5e5e5;border-radius:6px"></iframe>
 
 [Open this case study in a new tab](case-studies/case2_format.html)
 
-The figure below has one tab for each of the following paragraphs, in the same order. Each tab shows the memory before and after the relevant tasks in full, exactly as written, together with every turn of the actor, so that each quoted line can be traced to the task where it was written and the task where it was used. In the repository-layout and threading.local() examples, a second column shows the same model attempting the later issue four times without memory.
+**The trained writer keeps what the actor’s experience reveals about the environment, revises or generalizes it, and later tasks start from it.** Each tab below follows one memory from the task where it is written to the task that revises or uses it.
 
-[Open the interactive case study in a new tab](case-studies/case3_cotrain.html)
+<iframe src="case-studies/case3_cotrain.html" data-autoheight loading="lazy" style="width:100%;height:720px;border:1px solid #e5e5e5;border-radius:6px"></iframe>
+
+[Open this case study in a new tab](case-studies/case3_cotrain.html)
+
+**The exploration reward scores what an update adds to the memory, not how much of its text changes.** In one training stream, an update that records a new fix and a general rule receives 0.875, while one that rewrites every bullet of the previous memory in new words and adds a single detail receives 0.25.
 
 <iframe src="case-studies/case_exploration.html" data-autoheight loading="lazy" style="width:100%;height:720px;border:1px solid #e5e5e5;border-radius:6px"></iframe>
 
