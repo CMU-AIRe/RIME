@@ -299,13 +299,13 @@ So far we have trained a single model to operate in both the actor and writer ro
 
 ## **Case studies: what does the trained writer write?\[under construction\]**
 
-**A memory that summarizes the last task does not help with the next one.** In the example below, the untrained writer recounts its unfinished attempt at the previous task, while the trained writer describes how the new repository is organized. Only the actor that receives the description of the repository solves the next task.
+**A memory that summarizes the last task does not help with the next one.** In the example below, the untrained writer replaces its memory after each task with a summary of that task, while the trained writer keeps and extends a description of the repository. Only the actor given the trained writer’s memory solves the next task.
 
 <iframe src="case-studies/case1_summarization.html" data-autoheight loading="lazy" style="width:100%;height:720px;border:1px solid #e5e5e5;border-radius:6px"></iframe>
 
 [Open this case study in a new tab](case-studies/case1_summarization.html)
 
-**Without the improvement reward, the writer passes on memory that later tasks cannot rely on.** In the example below, only the actor is trained, and its writer passes on a single test command, while our writer passes on a lesson to run the full test suite, which the next actor follows to solve its issue.
+**Without the improvement reward, the writer passes on memory that later tasks cannot rely on, even when that memory is well formed.** In the examples below, a writer that receives no reward passes on a single test command, and a writer trained only for format leaves out how to submit, so the next actor fixes the bug but never submits the fix.
 
 <iframe src="case-studies/case2_format.html" data-autoheight loading="lazy" style="width:100%;height:720px;border:1px solid #e5e5e5;border-radius:6px"></iframe>
 
