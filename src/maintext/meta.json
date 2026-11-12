@@ -3,14 +3,39 @@
   "subtitle": "",
   "description": "How to Train Memory Writing for Continual Learning.",
   "authors": [
-    { "name": "Qixin Xu", "affiliation": ["Carnegie Mellon University"] },
-    { "name": "Yuxiao Qu", "affiliation": ["Carnegie Mellon University"] },
-    { "name": "Ian Wu", "affiliation": ["Carnegie Mellon University"] },
-    { "name": "Aviral Kumar", "affiliation": ["Carnegie Mellon University"] }
+    {
+      "name": "Qixin Xu",
+      "affiliation": [
+        "Carnegie Mellon University"
+      ]
+    },
+    {
+      "name": "Yuxiao Qu",
+      "affiliation": [
+        "Carnegie Mellon University"
+      ]
+    },
+    {
+      "name": "Ian Wu",
+      "affiliation": [
+        "Carnegie Mellon University"
+      ]
+    },
+    {
+      "name": "Aviral Kumar",
+      "affiliation": [
+        "Carnegie Mellon University"
+      ]
+    }
   ],
-  "affiliations": ["Carnegie Mellon University"],
+  "affiliations": [
+    "Carnegie Mellon University"
+  ],
   "notes": [],
   "date": "November 2026",
   "github_url": "",
-  "logo": null
+  "logo": {
+    "src": "assets/logos/cmu_wordmark.png",
+    "alt": "Carnegie Mellon University"
+  }
 }
