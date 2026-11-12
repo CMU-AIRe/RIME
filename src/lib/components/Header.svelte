@@ -26,6 +26,7 @@
   data-sveltekit-noscroll
   data-sveltekit-preload-code="eager"
 >
+  <div class="header-grid">
   <div class="header-inner mb-8">
     <h1 class="title-font font-bold text-black text-3xl mb-4 leading-tight">
       {meta.title ?? ""}
@@ -84,14 +85,33 @@
       {/if}
     </div>
   </div>
+  </div>
 </header>
 
 <style lang="postcss">
-  /* Keep the header aligned with the same main-text column width used by Markdown.svelte. */
+  /* Same three-track grid as .md-grid in Markdown.svelte, so the title block sits exactly
+     over the text column: the left track reserves the fixed TOC (--toc-reserve, published by
+     ScrollMeter; 0 when the TOC is hidden), and the text column follows --md-main-col. */
+  .header-grid {
+    display: grid;
+    grid-template-columns: minmax(var(--toc-reserve, 0px), 1fr) minmax(0, var(--md-main-col, 760px)) minmax(0, 1fr);
+    column-gap: var(--toc-gap, var(--side-gap, 32px));
+  }
   .header-inner {
-    max-width: var(--md-main-col, 760px);
-    margin-left: auto;
-    margin-right: auto;
+    grid-column: 2;
+    min-width: 0;
+  }
+  /* Narrow screens / TOC hidden: one centred column, like the article. */
+  @media (max-width: 1024px) {
+    .header-grid { grid-template-columns: minmax(0, 1fr); }
+    .header-inner { grid-column: 1; width: 100%; max-width: 760px; justify-self: center; }
+  }
+  :global(html[data-sidecols="off"]) .header-grid { grid-template-columns: minmax(0, 1fr); }
+  :global(html[data-sidecols="off"]) .header-inner {
+    grid-column: 1;
+    width: 100%;
+    max-width: 760px;
+    justify-self: center;
   }
 
   .title-font {
@@ -111,7 +131,7 @@
   .authors {
     font-size: 16px;
     line-height: 2;
-    text-align: center;
+    text-align: left; /* same alignment as the title and the date */
   }
 
   .author {
@@ -137,7 +157,7 @@
     margin-top: 10px; /* visual separation from authors */
     color: #111827;
     opacity: 0.9;
-    text-align: center;
+    text-align: left;
   }
 
   .notes {
@@ -148,7 +168,7 @@
   .affiliation-item,
   .note-item {
     display: inline-block;
-    margin: 0 8px;
+    margin: 0 16px 0 0;
   }
 
   .date {
