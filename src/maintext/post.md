@@ -317,6 +317,12 @@ So far we have trained a single model to operate in both the actor and writer ro
 
 [Open this case study in a new tab](case-studies/case3_cotrain.html)
 
+<strong class="md-plain">When the actor explores, the writer has more to keep, and later tasks build on it.</strong> Each tab below follows one exploratory step of our actor, what the writer keeps from it, and the later task that uses it.
+
+<iframe src="case-studies/case_explore_payoff.html" data-autoheight loading="lazy" style="width:100%;height:720px;border:1px solid #e5e5e5;border-radius:6px"></iframe>
+
+[Open this case study in a new tab](case-studies/case_explore_payoff.html)
+
 <strong class="md-plain">The exploration reward scores what an update adds to the memory, not how much of its text changes.</strong> In one training stream, an update that records a new fix and a general rule receives 0.875, while one that rewrites every bullet of the previous memory in new words and adds a single detail receives 0.25.
 
 <iframe src="case-studies/case_exploration.html" data-autoheight loading="lazy" style="width:100%;height:720px;border:1px solid #e5e5e5;border-radius:6px"></iframe>
