@@ -104,18 +104,44 @@ if os.path.exists(hl_path):
         post = post[:m.start()] + '**' + m.group(0).replace('**', '') + '**' + post[m.end():]
         print('highlighted:', passage[:60])
 
-# --- 2b'. bold passages that stay black (scripts/notion/plain.txt) ----------------------
+# --- 2b'. bold that stays black (scripts/notion/plain.txt) -----------------------------
+# A plain line names a passage, exactly as it is bolded in Notion, that keeps the normal ink
+# colour. A line "[section] <H2 title>" keeps every paragraph-opening bold sentence in that
+# section black.
 pl_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'plain.txt')
+
+
+def plain(text, em=False):
+    return f'<strong class="md-plain">{"<em>" + text + "</em>" if em else text}</strong>'
+
+
 if os.path.exists(pl_path):
-    for passage in (l.strip() for l in open(pl_path)):
-        if not passage or passage.startswith('#'):
+    for line in (l.strip() for l in open(pl_path)):
+        if not line or line.startswith('#'):
             continue
-        bold = '**' + passage + '**'
-        if bold not in post:
-            print('WARNING: plain-bold passage not found:', passage[:60])
+        if line.startswith('[section]'):
+            title = line[len('[section]'):].strip()
+            lines = post.split('\n')
+            inside, n = False, 0
+            for k, ln in enumerate(lines):
+                if ln.startswith('## '):
+                    inside = ln[3:].replace('*', '').strip() == title
+                    continue
+                if inside:
+                    new_ln, c = re.subn(r'^(\s*(?:[-*] )?)(\*\*\*|\*\*)([^*\n]+?)\2',
+                                        lambda m: m.group(1) + plain(m.group(3), m.group(2) == '***'), ln)
+                    lines[k], n = new_ln, n + c
+            post = '\n'.join(lines)
+            print(f'plain paragraph openings in "{title}":', n)
             continue
-        post = post.replace(bold, f'<strong class="md-plain">{passage}</strong>', 1)
-        print('plain bold:', passage[:60])
+        for stars in ('***', '**'):
+            bold = stars + line + stars
+            if bold in post:
+                post = post.replace(bold, plain(line, stars == '***'), 1)
+                print('plain bold:', line[:60])
+                break
+        else:
+            print('WARNING: plain-bold passage not found:', line[:60])
 
 # --- 2c. case-study iframes size themselves to their content ---------------------------
 post, n = re.subn(r'<iframe src="(case-studies/[^"]+)" loading="lazy" style="width:100%;height:720px;',

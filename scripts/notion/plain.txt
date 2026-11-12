@@ -1,4 +1,7 @@
-# One passage per line, exactly as it is bolded in Notion (the text between the ** markers).
-# postprocess.py keeps each of these bold but in the normal ink colour instead of Carnegie Red.
+# Bold text that keeps the normal ink colour instead of Carnegie Red (applied by postprocess.py).
+# - A plain line is a passage exactly as it is bolded in Notion (the text between the ** or *** markers).
+# - "[section] <H2 title>" keeps every bold sentence that opens a paragraph in that section black.
 # Lines starting with # are ignored.
 useful memories require informative experience.
+order training tasks from easy to medium to hard
+[section] Experiments
