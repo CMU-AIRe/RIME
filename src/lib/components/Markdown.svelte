@@ -110,6 +110,15 @@
     html(html: string) {
       return rewriteRootUrls(html);
     },
+    paragraph(text: string) {
+      // Notion cannot caption tables, so table captions are written as a grey paragraph
+      // ("::gray[*Table N.* ...]::") below the table. Render them like figure captions.
+      const m = /^<span style="color: #9B9A97;">(<em>Table (\d+)\.<\/em>[\s\S]*)<\/span>$/.exec(text.trim());
+      if (m) {
+        return `<div class='md-figcaption md-tablecaption text-left text-gray-500 mb-4 text-sm' data-table-num="${m[2]}"><p>${m[1]}</p></div>\n`;
+      }
+      return `<p>${text}</p>\n`;
+    },
     heading(text: string, level: number, raw: string, slugger: any) {
       const id = slugger ? slugger.slug(raw) : slugify(raw || text);
       // Keep plain heading text; the scroll meter will link to #id
@@ -1407,6 +1416,11 @@
     /* Override legacy padding classes in the generated HTML. */
     padding-left: 0 !important;
     padding-right: 0 !important;
+  }
+
+  /* Table captions sit right under the table (which keeps its own bottom margin). */
+  :global(.md-output .md-tablecaption) {
+    margin-top: -0.5rem;
   }
 
   /* 2x2 figure grid (used in some markdown sections) */

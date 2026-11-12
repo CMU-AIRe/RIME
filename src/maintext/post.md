@@ -299,25 +299,25 @@ So far we have trained a single model to operate in both the actor and writer ro
 
 ## **Case studies: what does the trained writer write?\[under construction\]**
 
-**A memory that summarizes the last task does not help with the next one.** In the example below, the untrained writer replaces its memory after each task with a summary of that task, while the trained writer keeps and extends a description of the repository. Only the actor given the trained writer’s memory solves the next task.
+<strong class="md-plain">A memory that summarizes the last task does not help with the next one.</strong> In the example below, the untrained writer replaces its memory after each task with a summary of that task, while the trained writer keeps and extends a description of the repository. Only the actor given the trained writer’s memory solves the next task.
 
 <iframe src="case-studies/case1_summarization.html" data-autoheight loading="lazy" style="width:100%;height:720px;border:1px solid #e5e5e5;border-radius:6px"></iframe>
 
 [Open this case study in a new tab](case-studies/case1_summarization.html)
 
-**Without the improvement reward, the writer passes on memory that later tasks cannot rely on, even when that memory is well formed.** In the examples below, a writer that receives no reward passes on a single test command, and a writer trained only for format leaves out how to submit, so the next actor fixes the bug but never submits the fix.
+<strong class="md-plain">Without the improvement reward, the writer passes on memory that later tasks cannot rely on, even when that memory is well formed.</strong> In the examples below, a writer that receives no reward passes on a single test command, and a writer trained only for format leaves out how to submit, so the next actor fixes the bug but never submits the fix.
 
 <iframe src="case-studies/case2_format.html" data-autoheight loading="lazy" style="width:100%;height:720px;border:1px solid #e5e5e5;border-radius:6px"></iframe>
 
 [Open this case study in a new tab](case-studies/case2_format.html)
 
-**The trained writer keeps what the actor’s experience reveals about the environment, revises or generalizes it, and later tasks start from it.** Each tab below follows one memory from the task where it is written to the task that revises or uses it.
+<strong class="md-plain">The trained writer keeps what the actor’s experience reveals about the environment, revises or generalizes it, and later tasks start from it.</strong> Each tab below follows one memory from the task where it is written to the task that revises or uses it.
 
 <iframe src="case-studies/case3_cotrain.html" data-autoheight loading="lazy" style="width:100%;height:720px;border:1px solid #e5e5e5;border-radius:6px"></iframe>
 
 [Open this case study in a new tab](case-studies/case3_cotrain.html)
 
-**The exploration reward scores what an update adds to the memory, not how much of its text changes.** In one training stream, an update that records a new fix and a general rule receives 0.875, while one that rewrites every bullet of the previous memory in new words and adds a single detail receives 0.25.
+<strong class="md-plain">The exploration reward scores what an update adds to the memory, not how much of its text changes.</strong> In one training stream, an update that records a new fix and a general rule receives 0.875, while one that rewrites every bullet of the previous memory in new words and adds a single detail receives 0.25.
 
 <iframe src="case-studies/case_exploration.html" data-autoheight loading="lazy" style="width:100%;height:720px;border:1px solid #e5e5e5;border-radius:6px"></iframe>
 

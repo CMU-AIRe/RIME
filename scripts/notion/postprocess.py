@@ -106,8 +106,8 @@ if os.path.exists(hl_path):
 
 # --- 2b'. bold that stays black (scripts/notion/plain.txt) -----------------------------
 # A plain line names a passage, exactly as it is bolded in Notion, that keeps the normal ink
-# colour. A line "[section] <H2 title>" keeps every paragraph-opening bold sentence in that
-# section black.
+# colour. A line "[section] <start of an H2 title>" keeps every paragraph-opening bold sentence in
+# that section black.
 pl_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'plain.txt')
 
 
@@ -125,7 +125,7 @@ if os.path.exists(pl_path):
             inside, n = False, 0
             for k, ln in enumerate(lines):
                 if ln.startswith('## '):
-                    inside = ln[3:].replace('*', '').strip() == title
+                    inside = ln[3:].replace('*', '').strip().startswith(title)
                     continue
                 if inside:
                     new_ln, c = re.subn(r'^(\s*(?:[-*] )?)(\*\*\*|\*\*)([^*\n]+?)\2',
