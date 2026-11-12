@@ -155,6 +155,22 @@ if os.path.exists(fs_path):
                           lambda m: m.group(1) + '{style=' + css + '}', post)
         print('figure size', name, css, 'x', n)
 
+# --- 2b'''. internal links (scripts/notion/links.txt) --------------------------------------
+lk_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'links.txt')
+if os.path.exists(lk_path):
+    for line in open(lk_path):
+        line = line.rstrip('\n')
+        if not line.strip() or line.startswith('#'):
+            continue
+        passage, href = line.split('\t')
+        m = re.fullmatch(r'(.*)\[(.+)\](.*)', passage)
+        plain = m.group(1) + m.group(2) + m.group(3)
+        if plain not in post:
+            print('WARNING: link passage not found:', plain[:60])
+            continue
+        post = post.replace(plain, m.group(1) + '[' + m.group(2) + '](' + href + ')' + m.group(3), 1)
+        print('link:', m.group(2), '->', href)
+
 # --- 2c. case-study iframes size themselves to their content ---------------------------
 post, n = re.subn(r'<iframe src="(case-studies/[^"]+)" loading="lazy" style="width:100%;height:720px;',
                   r'<iframe src="\1" data-autoheight loading="lazy" style="width:100%;height:720px;', post)

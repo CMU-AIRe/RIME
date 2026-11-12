@@ -313,9 +313,9 @@
       }
     }
     active_index = ans;
-    const allFolded = areAllH2SectionsFolded();
-    showAll = isHovering || active_index < 0 || allFolded;
-    visibleIdSet = showAll ? null : computeVisibleIdSet(active_index);
+    // Always list every section and subsection; the active item is still highlighted.
+    showAll = true;
+    visibleIdSet = null;
   }
 
   function computeVisibleIdSet(activeIdx: number) {
