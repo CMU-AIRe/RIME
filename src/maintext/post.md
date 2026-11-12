@@ -347,7 +347,7 @@ We thank Anikait Singh, Apurva Gandhi, Violet Xiang and Hao Bai for helpful disc
 
 ## Citation
 
-Please cite this post as:
+If you think this blog post is useful for your work, please consider citing it. Thank you!
 
 ```bibtex
 @misc{Xu2026rime,
