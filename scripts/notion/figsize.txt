@@ -1,0 +1,3 @@
+# Display size of individual figures (applied by postprocess.py). One figure per line:
+# <file name in assets/figures> <CSS declarations without spaces>
+fig06_alchemy_chemistry.png width:min(480px,100%)

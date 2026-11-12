@@ -143,6 +143,18 @@ if os.path.exists(pl_path):
         else:
             print('WARNING: plain-bold passage not found:', line[:60])
 
+# --- 2b''. per-figure display size (scripts/notion/figsize.txt) --------------------------
+fs_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'figsize.txt')
+if os.path.exists(fs_path):
+    for line in (l.strip() for l in open(fs_path)):
+        if not line or line.startswith('#'):
+            continue
+        name, css = line.split(None, 1)
+        assert ' ' not in css, 'figsize.txt: the CSS value must not contain spaces: ' + line
+        post, n = re.subn(r'(!\[[^\]]*\]\(assets/figures/' + re.escape(name) + r'(?:\s+"[^"]*")?\))(?!\{)',
+                          lambda m: m.group(1) + '{style=' + css + '}', post)
+        print('figure size', name, css, 'x', n)
+
 # --- 2c. case-study iframes size themselves to their content ---------------------------
 post, n = re.subn(r'<iframe src="(case-studies/[^"]+)" loading="lazy" style="width:100%;height:720px;',
                   r'<iframe src="\1" data-autoheight loading="lazy" style="width:100%;height:720px;', post)
