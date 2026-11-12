@@ -104,6 +104,11 @@ if os.path.exists(hl_path):
         post = post[:m.start()] + '**' + m.group(0).replace('**', '') + '**' + post[m.end():]
         print('highlighted:', passage[:60])
 
+# --- 2c. case-study iframes size themselves to their content ---------------------------
+post, n = re.subn(r'<iframe src="(case-studies/[^"]+)" loading="lazy" style="width:100%;height:720px;',
+                  r'<iframe src="\1" data-autoheight loading="lazy" style="width:100%;height:720px;', post)
+print('auto-height iframes:', n)
+
 # --- 3. headings ----------------------------------------------------------------------
 post, n = re.subn(r'(?m)^#### ', '### ', post)
 print('#### -> ###:', n)

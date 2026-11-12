@@ -3,45 +3,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Recap or Memory</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=STIX+Two+Text:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<title>Recap or memory: what each writer passes to the next task</title>
 <style>
-/* Layout: one stream strip on top, a four-stop stepper, then the two writers side by side (stacked on phones). */
+/* Standalone page. Layout: stream strip, stepper, then one column (or two side by side, stacked on phones). */
 :root{
-  --bg:#FAF9FC; --surface:#FFFFFF; --ink:#1F2328; --muted:#646a74; --rule:#E2E1E8;
-  --mem:#6A4C9C; --mem-soft:#F2EEF8; --mem-line:#D9CFEA;
-  --act:#3B4763; --act-soft:#ECEEF3;
-  --amber:#9A6200; --amber-soft:#FCEFD3;
-  --tablib:#C9CDD6; --tenacity:#9AA3B5;
-  --ok:#2F6B4F; --bad:#9B3B32;
-  --code-bg:#F6F5F9;
-  --f-display:"STIX Two Text","STIX Two Math",Georgia,"Times New Roman",serif;
-  --f-body:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#15141A; --surface:#1D1C24; --ink:#E9E7EF; --muted:#A09DAB; --rule:#33313D;
-    --mem:#B79BE6; --mem-soft:#2A2338; --mem-line:#4A3D63;
-    --act:#AEB9D3; --act-soft:#252935;
-    --amber:#F0B84F; --amber-soft:#3A2D12;
-    --tablib:#4A4D57; --tenacity:#6E7790;
-    --ok:#7CC6A0; --bad:#E58A80;
-    --code-bg:#19181F;
-    color-scheme:dark;
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#15141A; --surface:#1D1C24; --ink:#E9E7EF; --muted:#A09DAB; --rule:#33313D;
-  --mem:#B79BE6; --mem-soft:#2A2338; --mem-line:#4A3D63;
-  --act:#AEB9D3; --act-soft:#252935;
-  --amber:#F0B84F; --amber-soft:#3A2D12;
-  --tablib:#4A4D57; --tenacity:#6E7790;
-  --ok:#7CC6A0; --bad:#E58A80;
-  --code-bg:#19181F;
-  color-scheme:dark;
+  /* Palette of Figures 1-2 (teaser and Pareto plot): cream page, dark outlines, ACT blue,
+     WRITE/memory terracotta with peach fills, golden for warnings, mint for solved. */
+  --bg:#FBF9F1; --surface:#FFFFFF; --ink:#1A1A1A; --muted:#66625A; --rule:#E4DFD2; --edge:#2B2B2B;
+  --mem:#C4553A; --mem-soft:#FCF0E9; --mem-line:#F2C3AC;
+  --act:#2F6DB5; --act-soft:#EEF4FB;
+  --amber:#B38600; --amber-soft:#FBEFC4;
+  --repo-a:#DDD8CC; --repo-b:#B9B2A3;
+  --base:#9A958B;
+  --ok:#2E9B4F; --ok-soft:#DDF5DA; --bad:#5A5A5A;
+  --code-bg:#F7F5EE;
+  --f-display:"Helvetica Neue","Nimbus Sans",Helvetica,Arial,sans-serif;
+  --f-body:"Helvetica Neue","Nimbus Sans",Helvetica,Arial,sans-serif;
+  --f-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"DejaVu Sans Mono",monospace;
+  color-scheme:light;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
@@ -50,22 +29,25 @@ body{background:var(--bg); color:var(--ink); font-family:var(--f-body); font-siz
 .wrap{max-width:1120px; margin:0 auto; padding-block:28px 40px;
   padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px));
   display:grid; gap:22px}
-h1{font-family:var(--f-display); font-weight:600; font-size:clamp(24px,3.4vw,32px); line-height:1.15; margin:0; text-wrap:balance}
-.lede{margin:6px 0 0; color:var(--muted); max-width:72ch}
+.wrap.single{max-width:900px}
+h1{font-family:var(--f-display); font-weight:700; letter-spacing:-.01em; font-size:clamp(24px,3.4vw,32px); line-height:1.15; margin:0; text-wrap:balance}
+.lede{margin:6px 0 0; color:var(--muted); max-width:76ch}
 .lede b{color:var(--ink); font-weight:600}
+code.i{font-family:var(--f-mono); font-size:.88em; background:var(--code-bg); border:1px solid var(--rule); border-radius:3px; padding:0 4px}
 
 /* stream strip */
 .stream{display:grid; gap:8px}
-.stream-row{display:flex; gap:3px; align-items:flex-end; overflow-x:auto; padding-bottom:2px}
-.tick{flex:1 0 18px; height:22px; border-radius:2px; background:var(--tablib); position:relative}
-.tick.ten{background:var(--tenacity)}
+.stream-row{display:flex; gap:3px; align-items:flex-end}
+.tick{height:22px; border-radius:2px; background:var(--repo-a)}
+.tick.b{background:var(--repo-b)}
 .tick.focus{outline:2px solid var(--mem); outline-offset:1px}
 .tick.now{background:var(--mem)}
+.tick{border-radius:3px}
 .stream-legend{display:flex; flex-wrap:wrap; gap:6px 18px; font-size:12.5px; color:var(--muted)}
 .sw{display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:6px; vertical-align:-1px}
 
 /* stepper */
-.stepper{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px}
+.stepper{display:grid; gap:8px}
 .step-btn{appearance:none; text-align:left; font:inherit; color:var(--muted); background:var(--surface);
   border:1px solid var(--rule); border-radius:6px; padding:10px 12px; cursor:pointer; display:grid; gap:2px; min-width:0}
 .step-btn .n{font-family:var(--f-mono); font-size:11.5px; letter-spacing:.04em}
@@ -73,7 +55,8 @@ h1{font-family:var(--f-display); font-weight:600; font-size:clamp(24px,3.4vw,32p
 .step-btn[aria-selected="true"]{border-color:var(--mem); background:var(--mem-soft)}
 .step-btn[aria-selected="true"] .n{color:var(--mem)}
 .step-btn:focus-visible{outline:2px solid var(--mem); outline-offset:2px}
-.note{margin:0; max-width:80ch}
+.note{margin:0; max-width:86ch; background:var(--surface); border:1.5px solid var(--rule); border-left:4px solid var(--edge); border-radius:8px; padding:9px 13px; font-size:14.5px}
+.note:empty{display:none}
 .controls{display:flex; flex-wrap:wrap; gap:10px 18px; align-items:center; justify-content:space-between}
 .toggles{display:flex; flex-wrap:wrap; gap:8px 16px; font-size:13px; color:var(--muted)}
 .toggles label{display:inline-flex; gap:6px; align-items:center; cursor:pointer}
@@ -83,26 +66,37 @@ h1{font-family:var(--f-display); font-weight:600; font-size:clamp(24px,3.4vw,32p
 .nav button:disabled{opacity:.4; cursor:default}
 .nav button:focus-visible{outline:2px solid var(--mem); outline-offset:2px}
 
-/* writers */
-.pair{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px}
+/* columns */
+.pair{display:grid; grid-template-columns:repeat(var(--cols,2),minmax(0,1fr)); gap:18px}
 .col{display:grid; gap:12px; align-content:start; min-width:0}
 .col-head{display:flex; flex-wrap:wrap; gap:6px 12px; align-items:baseline; justify-content:space-between;
   border-bottom:2px solid var(--rule); padding-bottom:8px}
-.col.ours .col-head{border-bottom-color:var(--mem)}
-.arm{font-family:var(--f-display); font-weight:600; font-size:19px}
+.col-head{border-bottom-color:var(--base)}
+.col.ours .col-head, .col.after .col-head{border-bottom-color:var(--mem)}
+.arm::before{content:""; display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--base); margin-right:8px; vertical-align:1px}
+.col.ours .arm::before, .col.after .arm::before{background:var(--mem)}
+.arm{font-family:var(--f-display); font-weight:700; font-size:17px}
 .arm small{font-family:var(--f-body); font-weight:400; font-size:12.5px; color:var(--muted); margin-left:6px}
 .task{font-family:var(--f-mono); font-size:12.5px; color:var(--muted)}
 .outcome{display:flex; flex-wrap:wrap; gap:6px; font-size:12.5px; font-variant-numeric:tabular-nums}
 .pill{border-radius:999px; padding:2px 10px; border:1px solid var(--rule); background:var(--surface); white-space:nowrap}
-.pill.ok{color:var(--ok); border-color:currentColor}
-.pill.bad{color:var(--bad); border-color:currentColor}
-.label{font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:600}
-.mem{border:1px solid var(--mem-line); border-left:3px solid var(--mem); border-radius:4px; background:var(--mem-soft); min-width:0}
+.pill.ok{color:#17602F; background:var(--ok-soft); border-color:var(--ok)}
+.pill.ok::before{content:"✓ "}
+.pill.bad{color:var(--bad); background:#EEEBE3; border-color:#B9B2A3}
+.pill.bad::before{content:"✗ "}
+
+/* memory */
+.mem{border:1.5px solid var(--mem-line); border-left:4px solid var(--mem); border-radius:8px; background:var(--mem-soft); min-width:0}
 .mem-bar{display:flex; justify-content:space-between; gap:8px; padding:7px 12px; font-size:12px; color:var(--mem); font-weight:600;
   border-bottom:1px solid var(--mem-line)}
-.mem-bar span:last-child{font-weight:400; color:var(--muted); font-family:var(--f-mono)}
-.mem pre{margin:0; padding:12px; font-family:var(--f-mono); font-size:12.4px; line-height:1.6; white-space:pre-wrap; word-break:break-word;
-  overflow-x:auto; color:var(--ink)}
+.mem-bar span:last-child{font-weight:400; color:var(--muted); font-family:var(--f-mono); white-space:nowrap}
+details.mem > summary{list-style:none; cursor:pointer}
+details.mem > summary::-webkit-details-marker{display:none}
+details.mem:not([open]) > summary.mem-bar{border-bottom:0}
+details.mem > summary .tw::before{content:"▸ "; }
+details.mem[open] > summary .tw::before{content:"▾ "; }
+.mem pre{margin:0; padding:10px 12px; font-family:var(--f-mono); font-size:12px; line-height:1.6; white-space:pre-wrap; word-break:break-word;
+  color:var(--ink); overflow-x:auto}
 .ln{display:block; padding-left:14px; text-indent:-14px}
 .ln.add{background:color-mix(in srgb, var(--mem) 12%, transparent)}
 .ln.add::before{content:"+ "; color:var(--mem); font-weight:500}
@@ -111,79 +105,138 @@ h1{font-family:var(--f-display); font-weight:600; font-size:clamp(24px,3.4vw,32p
 .dropped pre{padding:8px 0 0; color:var(--muted); text-decoration:line-through; text-decoration-color:color-mix(in srgb, var(--muted) 60%, transparent)}
 mark{color:inherit; border-radius:2px; padding:0 1px}
 mark{-webkit-box-decoration-break:clone; box-decoration-break:clone; text-decoration-line:underline; text-decoration-thickness:2px; text-underline-offset:3px}
-mark.recap{background:var(--amber-soft); text-decoration-color:var(--amber)}
-mark.know{background:color-mix(in srgb, var(--mem) 18%, transparent); text-decoration-color:var(--mem)}
+mark.warn{background:var(--amber-soft); text-decoration-color:var(--amber)}
+mark.know{background:#F9DCCF; text-decoration-color:var(--mem)}
 body.nohl mark{background:none; text-decoration:none}
-.act{border:1px solid var(--rule); border-left:3px solid var(--act); border-radius:4px; background:var(--surface)}
-.act-bar{padding:7px 12px; font-size:12px; color:var(--act); font-weight:600; border-bottom:1px solid var(--rule)}
-.act ol{list-style:none; margin:0; padding:10px 12px; display:grid; gap:8px}
-.act li{display:grid; grid-template-columns:auto minmax(0,1fr); gap:10px; align-items:start}
-.act .k{font-family:var(--f-mono); font-size:11px; color:var(--muted); padding-top:2px; white-space:nowrap}
-.act .v{font-size:13px; min-width:0}
-.act code{font-family:var(--f-mono); font-size:12.2px; background:var(--code-bg); border:1px solid var(--rule); border-radius:3px;
-  padding:4px 7px; display:block; white-space:pre-wrap; word-break:break-word}
+
+/* writer output */
+details.raw{border:1.5px dashed var(--mem-line); border-radius:8px; background:var(--surface)}
+details.raw summary{cursor:pointer; padding:7px 12px; font-size:12px; color:var(--mem); font-weight:600}
+details.raw pre{margin:0; padding:0 12px 12px; font-family:var(--f-mono); font-size:12.2px; line-height:1.55; white-space:pre-wrap; word-break:break-word; max-height:480px; overflow:auto}
+
+/* actor turns */
+.act{border:1.5px solid var(--rule); border-left:4px solid var(--act); border-radius:8px; background:var(--surface); min-width:0}
+.act-bar{display:flex; justify-content:space-between; gap:8px; padding:7px 12px; font-size:12px; color:var(--act); font-weight:600; border-bottom:1px solid var(--rule)}
+.act-bar button{appearance:none; font:inherit; font-size:11.5px; font-weight:500; color:var(--muted); background:none; border:0; cursor:pointer; padding:0}
+.act-bar button:focus-visible{outline:2px solid var(--act); outline-offset:2px}
+.turns{display:grid}
+details.turn{border-top:1px solid var(--rule)}
+details.turn:first-child{border-top:0}
+details.turn > summary{cursor:pointer; display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:10px; align-items:baseline; padding:7px 12px}
+details.turn > summary::-webkit-details-marker{display:none}
+details.turn > summary .s{font-family:var(--f-mono); font-size:11px; color:var(--muted); white-space:nowrap}
+details.turn > summary .c{font-family:var(--f-mono); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0}
+details.turn > summary .tag{font-size:11px; color:var(--muted); white-space:nowrap}
+details.turn.key > summary .s{color:var(--act); font-weight:600}
+details.turn.key > summary{background:var(--act-soft)}
+.turn-body{display:grid; gap:8px; padding:4px 12px 12px}
+.turn-body .lab{font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); font-weight:600}
+.turn-body .think{font-size:13px; white-space:pre-wrap; word-break:break-word; margin:0}
+.turn-body pre{margin:0; font-family:var(--f-mono); font-size:12px; line-height:1.55; background:var(--code-bg); border:1px solid var(--rule); border-radius:3px;
+  padding:6px 8px; white-space:pre-wrap; word-break:break-word; max-height:320px; overflow:auto}
+.turn-body pre.obs{color:var(--muted)}
+.cut{color:var(--muted); font-style:italic}
+details.turn.tall .turn-body pre, .mem.tall pre{max-height:none}
+
+.excerpt{border:1.5px solid var(--rule); border-left:4px solid var(--act); border-radius:8px; background:var(--surface); min-width:0}
+.excerpt .act-bar{border-bottom:1px solid var(--rule)}
+.ex-item{padding:7px 12px; border-top:1px solid var(--rule); display:grid; gap:3px}
+.ex-item:first-of-type{border-top:0}
+.ex-item .lab{font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); font-weight:600}
+.ex-item p{margin:0; font-size:13px; white-space:pre-wrap; word-break:break-word}
+.ex-item pre{margin:0; font-family:var(--f-mono); font-size:12px; line-height:1.5; background:var(--code-bg); border:1px solid var(--rule); border-radius:4px; padding:6px 8px; white-space:pre-wrap; word-break:break-word}
 .legend{display:flex; flex-wrap:wrap; gap:6px 18px; font-size:12.5px; color:var(--muted)}
 .foot{font-size:12.5px; color:var(--muted); border-top:1px solid var(--rule); padding-top:12px}
 .foot code{font-family:var(--f-mono); font-size:11.5px; word-break:break-all}
+
+details.act-c > summary{cursor:pointer; list-style:none}
+details.act-c > summary::-webkit-details-marker{display:none}
+details.act-c:not([open]) > summary.act-bar{border-bottom:0}
+details.act-c > summary .tw::before{content:"▸ "}
+details.act-c[open] > summary .tw::before{content:"▾ "}
+.act-bar .cnt{font-weight:400; color:var(--muted); font-family:var(--f-mono); white-space:nowrap}
+/* page header and example tabs */
+.page-head h1{margin-bottom:2px}
+.tabs{display:flex; flex-wrap:wrap; gap:6px; border-bottom:1px solid var(--rule); padding-bottom:10px}
+.tab-btn{appearance:none; font:inherit; font-size:13.5px; font-weight:500; color:var(--muted); background:var(--surface);
+  border:1px solid var(--rule); border-radius:999px; padding:5px 14px; cursor:pointer}
+.tab-btn[aria-selected="true"]{color:var(--ink); border-color:var(--mem); background:var(--mem-soft)}
+.tab-btn:focus-visible{outline:2px solid var(--mem); outline-offset:2px}
+.example{display:grid; gap:22px}
+h2{font-family:var(--f-display); font-weight:700; letter-spacing:-.005em; font-size:clamp(19px,2.4vw,23px); line-height:1.25; margin:0; text-wrap:balance}
+.tcell{flex:1 1 0; min-width:6px; display:flex; flex-direction:column; gap:3px; align-items:stretch}
+.tval{font-family:var(--f-mono); font-size:11px; color:var(--muted); text-align:center; font-variant-numeric:tabular-nums}
+.tblock{margin:0; padding:10px 12px; border:1px dashed var(--rule); border-radius:4px; color:var(--muted); font-size:13.5px}
+.act-intro{padding:8px 12px 10px; border-bottom:1px solid var(--rule); display:grid; gap:4px}
+.act-intro .lab{font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); font-weight:600}
+.act-intro pre{margin:0; font-family:var(--f-mono); font-size:12px; line-height:1.5; background:var(--code-bg); border:1px solid var(--rule); border-radius:3px; padding:6px 8px; white-space:pre-wrap; word-break:break-word; color:var(--muted); max-height:220px; overflow:auto}
 @media (max-width:760px){
-  .pair{grid-template-columns:minmax(0,1fr)}
-  .stepper{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .stepper{grid-template-columns:repeat(2,minmax(0,1fr)) !important}
+  .pair{gap:12px}
+  .arm{font-size:15.5px}
 }
+@media (max-width:560px){
+  .pair{grid-template-columns:minmax(0,1fr)}
+}
+.single-stage .stepper, .single-stage .nav{display:none}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <h1>Recap or memory: what each writer passes to the next task</h1>
-    <p class="lede">One Codebase Adaptation test stream, the same task order for both models. Tasks 10 and 11 are the first two
-      <b>tenacity</b> issues, right after nine <b>tablib</b> issues. Left: Qwen3.5-4B with an untrained writer. Right: the same model trained with our method.
-      Every memory below is shown in full, exactly as written.</p>
+<div class="wrap" id="wrap">
+  <header class="page-head">
+    <h1 id="h1"></h1>
+    <p class="lede" id="page-lede"></p>
   </header>
 
-  <section class="stream" aria-label="Position in the 19-task stream">
-    <div class="stream-row" id="ticks"></div>
-    <div class="stream-legend">
-      <span><i class="sw" style="background:var(--tablib)"></i>tablib, tasks 1–9</span>
-      <span><i class="sw" style="background:var(--tenacity)"></i>tenacity, tasks 10–19</span>
-      <span><i class="sw" style="background:var(--mem)"></i>task shown in this step</span>
+  <nav class="tabs" role="tablist" aria-label="Examples" id="tabs"></nav>
+
+  <section class="example" id="example">
+    <header>
+      <h2 id="h2"></h2>
+      <p class="lede" id="lede"></p>
+    </header>
+
+    <section class="stream" aria-label="Position in the stream">
+      <div class="stream-row" id="ticks"></div>
+      <div class="stream-legend" id="stream-legend"></div>
+    </section>
+
+    <nav class="stepper" role="tablist" aria-label="Steps" id="stepper"></nav>
+
+    <p class="note" id="note"></p>
+
+    <div class="controls">
+      <div class="toggles">
+        <label for="hl"><input type="checkbox" id="hl" checked> Highlight</label>
+        <label for="diff"><input type="checkbox" id="diff"> Mark changes from the previous memory</label>
+      </div>
+      <div class="nav">
+        <button type="button" id="prev">← Previous</button>
+        <button type="button" id="next">Next →</button>
+      </div>
     </div>
+
+    <div class="legend" id="hl-legend"></div>
+
+    <div class="pair" id="pair"></div>
+
+    <footer class="foot" id="foot"></footer>
   </section>
-
-  <nav class="stepper" role="tablist" aria-label="Steps" id="stepper"></nav>
-
-  <p class="note" id="note"></p>
-
-  <div class="controls">
-    <div class="toggles">
-      <label for="hl"><input type="checkbox" id="hl" checked> Highlight</label>
-      <label for="diff"><input type="checkbox" id="diff"> Mark changes from the previous memory</label>
-    </div>
-    <div class="nav">
-      <button type="button" id="prev">← Previous</button>
-      <button type="button" id="next">Next →</button>
-    </div>
-  </div>
-
-  <div class="legend" id="hl-legend">
-    <span><mark class="recap">&nbsp;amber&nbsp;</mark> account of the last attempt</span>
-    <span><mark class="know">&nbsp;purple&nbsp;</mark> reusable fact about the repository</span>
-  </div>
-
-  <div class="pair" id="pair"></div>
-
-  <footer class="foot" id="foot"></footer>
 </div>
 
-<script id="case-data" type="application/json">{"stages": [{"title": "Memory entering task 10", "kind": "in", "task": 10, "taskIdx": 0, "note": "Task 10 is the first tenacity issue. Both memories still describe tablib, the repository of the first nine tasks."}, {"title": "Written after task 10", "kind": "out", "task": 10, "taskIdx": 0, "note": "Both writers drop the tablib notes. The untrained writer replaces them with an account of its unfinished attempt on this issue. The trained writer replaces them with a map of the tenacity package."}, {"title": "Task 11 starts from it", "kind": "use", "task": 11, "taskIdx": 1, "note": "Task 11 is a different tenacity issue. With only the account of the previous attempt, the untrained actor clones the upstream repository into /tmp and works there, concludes the issue is already fixed and submits. The trained actor goes straight to tenacity/__init__.py, patches begin() and runs the test suite before submitting."}, {"title": "Written after task 11", "kind": "out", "task": 11, "taskIdx": 1, "note": "The untrained writer again narrates the attempt and ends with a command for a next step. The trained writer keeps the package map and adds the keys of the statistics dictionary it just fixed."}], "arms": [{"key": "untrained", "name": "Untrained writer", "sub": "Qwen3.5-4B", "steps": [{"task_id": "jd__tenacity-615", "outcome": {"success": false, "reward": 0.0, "steps": 40, "eval_status": null}, "memory_in": "### Repository Knowledge\n- The tablib repository is at `/testbed/src/tablab/` with core logic in `core.py` and format handlers in `formats/` directory\n- YAML format handler is in `/testbed/src/tablib/formats/_yaml.py` with `import_set` and `export_set` methods\n- Dataset loading goes through `load()` method which calls `fmt.import_set()` on the detected format\n- The `_set_dict` setter validates pickle structure expecting either a list of row lists or list of dicts with headers\n- Tests are run via pytest in the `/testbed/tests/` directory\n- The `dict` property has `_set_dict` method at around line 340 that handles loading data\n- Format detection is done by the `detect_format()` function which checks format handlers\n\n### Lessons & Pitfalls\n- Modifying `_set_dict` to add checking prevents raw `KeyError: 0` but requires new approach to handle invalid YAML structures\n- Error messages should be more informative than generic exceptions when data format doesn't match expectations\n- The YAML format expects specific structure (list of rows or list of dicts), nested dict structures are not supported\n- When fixing tests, use the file path `/testbed/src/tablib/core.py` not site-packages\n- Always verify environment has necessary dependencies like PyYAML installed (`python -c \"import yaml\"`)\n- Don't combine multiple sed commands or complex edits in one step to avoid fragile edits", "memory_out": "Looking at my attempt to solve the multiprocessing issue with tenacity, I realize I didn't complete the fix - the helpers functions weren't properly added and the code likely isn't working. However, let me check the current state and submit what I have.\n\nThe key issue was that `Future` (which inherits from `futures.Future`) can't be pickled because it contains internal threading locks. The fix requires implementing `__reduce__` on both `RetryError` and `Future` classes, along with helper functions to reconstruct them during unpickling.\n\nSince I ran out of steps and the file modifications were incomplete, I'll submit the task. The correct approach would be to:\n\n1. Add `__reduce__` to `Future` that returns `time` module and a reconstruction lambda\n2. Add `__reduce__` to `RetryError` that extracts exception type/args separately \n3. Add helper functions `_rebuild_fut` and `_rebuild_from_exc` that can be found by Python via the timestamp from `__reduce__`\n\nI stopped working on this partial fix and moved to the next issue.\n\n```bash\necho COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT\n```", "marks_in": [], "marks_out": [{"kind": "recap", "text": "Looking at my attempt to solve the multiprocessing issue with tenacity, I realize I didn't complete the fix"}, {"kind": "recap", "text": "Since I ran out of steps and the file modifications were incomplete, I'll submit the task."}, {"kind": "recap", "text": "I stopped working on this partial fix and moved to the next issue."}], "act": []}, {"task_id": "jd__tenacity-603", "outcome": {"success": false, "reward": 0.0, "steps": 13, "eval_status": "tests_failed"}, "memory_in": "Looking at my attempt to solve the multiprocessing issue with tenacity, I realize I didn't complete the fix - the helpers functions weren't properly added and the code likely isn't working. However, let me check the current state and submit what I have.\n\nThe key issue was that `Future` (which inherits from `futures.Future`) can't be pickled because it contains internal threading locks. The fix requires implementing `__reduce__` on both `RetryError` and `Future` classes, along with helper functions to reconstruct them during unpickling.\n\nSince I ran out of steps and the file modifications were incomplete, I'll submit the task. The correct approach would be to:\n\n1. Add `__reduce__` to `Future` that returns `time` module and a reconstruction lambda\n2. Add `__reduce__` to `RetryError` that extracts exception type/args separately \n3. Add helper functions `_rebuild_fut` and `_rebuild_from_exc` that can be found by Python via the timestamp from `__reduce__`\n\nI stopped working on this partial fix and moved to the next issue.\n\n```bash\necho COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT\n```", "memory_out": "Looking at the results, I see that my previous submission failed due to tests failing. Let me first understand what the actual issue is by examining the tests and understanding the problem better. The task is to fix an issue where `delay_since_first_attempt` doesn't exist in the statistics dictionary.\n\nLet me first check what tests are failing and understand the actual requirements.\n\n```bash\nfind /tmp/tenacity/tests -name \"*.py\" -exec grep -l \"delay_since_first_attempt\" {} \\;\n```", "marks_in": [{"kind": "recap", "text": "Looking at my attempt to solve the multiprocessing issue with tenacity, I realize I didn't complete the fix"}, {"kind": "recap", "text": "Since I ran out of steps and the file modifications were incomplete, I'll submit the task."}, {"kind": "recap", "text": "I stopped working on this partial fix and moved to the next issue."}], "marks_out": [{"kind": "recap", "text": "Looking at the results, I see that my previous submission failed due to tests failing."}], "act": [{"k": "turn 0 · thinks", "v": "Let me start by analyzing the current state of the tenacity repository and understanding the issue. The problem is that `delay_since_first_attempt` key doesn't exist in the `statistics` dictionary at initialization time, causing a `KeyError` on the first attempt.", "code": false}, {"k": "turn 0 · runs", "v": "git clone https://github.com/jd/tenacity.git /tmp/tenacity 2>/dev/null || cd /tmp/tenacity", "code": true}, {"k": "turn 12 · thinks", "v": "Looking at the current code, I can see that the issue has already been addressed in the current version of the tenacity library. The `begin()` method (lines 392-397) already sets `delay_since_first_attempt = 0`, which means the key always exists when the wrapped function runs.", "code": false}, {"k": "turn 12 · result", "v": "Submission FAILED (eval status: tests_failed).", "code": false}]}]}, {"key": "ours", "name": "Trained writer (ours)", "sub": "Qwen3.5-4B", "steps": [{"task_id": "jd__tenacity-615", "outcome": {"success": true, "reward": 0.4, "steps": 25, "eval_status": "completed"}, "memory_in": "### Repository Knowledge\n- tablib: Python library for tabular data export/import (CSV, Excel, ODS, HTML, JSON, YAML, RST, TSV, DBF, Jira, pandas)\n- src/tablib/core.py: Dataset, Databook classes with export/import methods, detect_format, register_builtins\n- src/tablib/formats/: _csv, _xlsx, _xls, _ods, _json, _yaml, _html, _rst, _tsv, _dbf, _jira, _df, _cli, _latex modules\n- src/tablib/exceptions.py: TablibException, InvalidDimensions, InvalidDatasetIndex, HeadersNeeded\n- src/tablib/formats/_yaml.py: YAMLFormat with export_set, import_set, import_book, detect methods\n- src/tablib/packages/dbfpy/: dbfpy package with dbf, dbfnew, fields, header, record, utils\n- tests/test_tablib.py: main test suite with 134 tests\n\n### Lessons & Pitfalls\n- Dataset.dict property uses _get_dict and _set_dict methods with Row class\n- supported formats via tablib.registry with register_builtins\n- YAML uses yaml.safe_load/safe_dump with ordered=False, default_flow_style=None, allow_unicode=True\n- imports: openpyxl, xlrd/xlwt, odf, dbfpy, pandas\n- src/tablib/utils.py: normalize_input function\n- submission: echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT", "memory_out": "### Repository Knowledge\n- tenacity: Python retry decorator library with exponential backoff\n- tenacity/__init__.py: main module with Retrying, AsyncRetrying, retry(), stop strategies\n- Files: _utils.py, retry.py, stop.py, after.py, before.py, before_sleep.py, nap.py, _version.py\n- tenacity/asyncio/: AsyncRetrying, tasyncio integration\n- tenacity/stop.py: stop strategies (stop_after_attempt, stop_after_delay)\n- tenacity/retry.py: retry strategies (retry_if_exception, retry_all, retry_any)\n- Uses threading.local() for per-thread state\n- Supports asyncio and tornado\n\n### Lessons & Pitfalls\n- Imports: dataclasses, threading, functools, typing, abc, re, concurrent.futures\n- Key classes: BaseRetrying(ABC), Retrying, RetryCallState, retry_base, Future, IterState\n- Pickle: __getstate__/__setstate__ for BaseRetrying and retry strategies with lambdas\n- Submission: echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT", "marks_in": [], "marks_out": [{"kind": "know", "text": "- tenacity/__init__.py: main module with Retrying, AsyncRetrying, retry(), stop strategies"}, {"kind": "know", "text": "- Files: _utils.py, retry.py, stop.py, after.py, before.py, before_sleep.py, nap.py, _version.py"}, {"kind": "know", "text": "- Uses threading.local() for per-thread state"}, {"kind": "know", "text": "- Pickle: __getstate__/__setstate__ for BaseRetrying and retry strategies with lambdas"}], "act": []}, {"task_id": "jd__tenacity-603", "outcome": {"success": true, "reward": 0.9, "steps": 5, "eval_status": "completed"}, "memory_in": "### Repository Knowledge\n- tenacity: Python retry decorator library with exponential backoff\n- tenacity/__init__.py: main module with Retrying, AsyncRetrying, retry(), stop strategies\n- Files: _utils.py, retry.py, stop.py, after.py, before.py, before_sleep.py, nap.py, _version.py\n- tenacity/asyncio/: AsyncRetrying, tasyncio integration\n- tenacity/stop.py: stop strategies (stop_after_attempt, stop_after_delay)\n- tenacity/retry.py: retry strategies (retry_if_exception, retry_all, retry_any)\n- Uses threading.local() for per-thread state\n- Supports asyncio and tornado\n\n### Lessons & Pitfalls\n- Imports: dataclasses, threading, functools, typing, abc, re, concurrent.futures\n- Key classes: BaseRetrying(ABC), Retrying, RetryCallState, retry_base, Future, IterState\n- Pickle: __getstate__/__setstate__ for BaseRetrying and retry strategies with lambdas\n- Submission: echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT", "memory_out": "### Repository Knowledge\n- tenacity: Python retry decorator library with exponential backoff\n- tenacity/__init__.py: BaseRetrying, Retrying, AsyncRetrying, retry(), stop strategies\n- tenacity/stop.py: stop_after_attempt, stop_after_delay strategies\n- tenacity/retry.py: retry_if_exception, retry_all, retry_any\n- tenacity/asyncio/__init__.py: AsyncRetrying, asyncio integration\n- tenacity/tornadoweb.py: Tornado integration\n- uses threading.local() for per-thread state\n- supports dataclasses, functools, typing, concurrent.futures\n\n### Lessons & Pitfalls\n- Key classes: BaseRetrying(ABC), RetryCallState, IterState, Future\n- Statistics dict has keys: start_time, attempt_number, idle_for, delay_since_first_attempt\n- Submission: echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT", "marks_in": [{"kind": "know", "text": "- tenacity/__init__.py: main module with Retrying, AsyncRetrying, retry(), stop strategies"}, {"kind": "know", "text": "- Files: _utils.py, retry.py, stop.py, after.py, before.py, before_sleep.py, nap.py, _version.py"}, {"kind": "know", "text": "- Uses threading.local() for per-thread state"}, {"kind": "know", "text": "- Pickle: __getstate__/__setstate__ for BaseRetrying and retry strategies with lambdas"}], "marks_out": [{"kind": "know", "text": "- Statistics dict has keys: start_time, attempt_number, idle_for, delay_since_first_attempt"}], "act": [{"k": "turn 0 · thinks", "v": "I'll examine the tenacity repository structure and fix the missing key in the begin method, then submit the solution.", "code": false}, {"k": "turn 0 · runs", "v": "find . -name \"*.py\" | xargs grep -l \"begin\\|statistics\" && cat -n tenacity/__init__.py | sed -n '290,350p'", "code": true}, {"k": "turn 2 · runs", "v": "sed -i 's/self.statistics\\[\"idle_for\"\\] = 0/self.statistics[\"idle_for\"] = 0\\n        self.statistics[\"delay_since_first_attempt\"] = None/g' tenacity/__init__.py && python -m pytest tests/ -v && echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT", "code": true}]}]}], "footer": "Codebase Adaptation test stream (19 tasks: 9 tablib, then 10 tenacity), task order 2 of 5. Memories are reproduced verbatim from the evaluation trajectories. Untrained writer: Table 1 row “Qwen3.5-4B, untrained, our ACT + WRITE loop”. Trained writer: Table 1 row “Qwen3.5-4B, Ours”."}</script>
+<script id="case-data" type="application/json">{"id": "case1", "title": "Recap or memory: what each writer passes to the next task", "lede": "", "examples": [{"id": "summarization", "tab": "Recap vs. memory", "heading": "Recap or memory", "lede": "One Codebase Adaptation test stream, the same task order for both models. Tasks 10 and 11 are the first two <b>tenacity<\/b> issues, right after nine <b>tablib<\/b> issues. Left: Qwen3.5-4B with an untrained writer. Right: the same model trained with our method.", "stream": {"unit": "task", "segments": [{"label": "tablib", "n": 9, "legend": "tablib, tasks 1–9"}, {"label": "tenacity", "n": 10, "legend": "tenacity, tasks 10–19"}], "focus": [10, 11]}, "arms": [{"key": "untrained", "name": "Untrained writer", "sub": "Qwen3.5-4B"}, {"key": "ours", "name": "Trained writer (ours)", "sub": "Qwen3.5-4B"}], "legend": [{"kind": "warn", "label": "account of the writer's own attempt"}, {"kind": "know", "label": "knowledge about the repository"}], "stages": [{"title": "Memory entering task 10", "now": [10], "head": {"untrained": "task 10 · tenacity", "ours": "task 10 · tenacity"}, "note": "Task 10 is the first tenacity issue. Both memories still describe tablib, the repository of the first nine tasks.", "cols": {"untrained": [{"type": "mem", "title": "Memory entering task 10", "text": "### Repository Knowledge\n- The tablib repository is at `/testbed/src/tablab/` with core logic in `core.py` and format handlers in `formats/` directory\n- YAML format handler is in `/testbed/src/tablib/formats/_yaml.py` with `import_set` and `export_set` methods\n- Dataset loading goes through `load()` method which calls `fmt.import_set()` on the detected format\n- The `_set_dict` setter validates pickle structure expecting either a list of row lists or list of dicts with headers\n- Tests are run via pytest in the `/testbed/tests/` directory\n- The `dict` property has `_set_dict` method at around line 340 that handles loading data\n- Format detection is done by the `detect_format()` function which checks format handlers\n\n### Lessons & Pitfalls\n- Modifying `_set_dict` to add checking prevents raw `KeyError: 0` but requires new approach to handle invalid YAML structures\n- Error messages should be more informative than generic exceptions when data format doesn't match expectations\n- The YAML format expects specific structure (list of rows or list of dicts), nested dict structures are not supported\n- When fixing tests, use the file path `/testbed/src/tablib/core.py` not site-packages\n- Always verify environment has necessary dependencies like PyYAML installed (`python -c \"import yaml\"`)\n- Don't combine multiple sed commands or complex edits in one step to avoid fragile edits", "prev": null, "marks": [], "collapsed": false, "tall": false}], "ours": [{"type": "mem", "title": "Memory entering task 10", "text": "### Repository Knowledge\n- tablib: Python library for tabular data export/import (CSV, Excel, ODS, HTML, JSON, YAML, RST, TSV, DBF, Jira, pandas)\n- src/tablib/core.py: Dataset, Databook classes with export/import methods, detect_format, register_builtins\n- src/tablib/formats/: _csv, _xlsx, _xls, _ods, _json, _yaml, _html, _rst, _tsv, _dbf, _jira, _df, _cli, _latex modules\n- src/tablib/exceptions.py: TablibException, InvalidDimensions, InvalidDatasetIndex, HeadersNeeded\n- src/tablib/formats/_yaml.py: YAMLFormat with export_set, import_set, import_book, detect methods\n- src/tablib/packages/dbfpy/: dbfpy package with dbf, dbfnew, fields, header, record, utils\n- tests/test_tablib.py: main test suite with 134 tests\n\n### Lessons & Pitfalls\n- Dataset.dict property uses _get_dict and _set_dict methods with Row class\n- supported formats via tablib.registry with register_builtins\n- YAML uses yaml.safe_load/safe_dump with ordered=False, default_flow_style=None, allow_unicode=True\n- imports: openpyxl, xlrd/xlwt, odf, dbfpy, pandas\n- src/tablib/utils.py: normalize_input function\n- submission: echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT", "prev": null, "marks": [], "collapsed": false, "tall": false}]}}, {"title": "Written after task 10", "now": [10], "head": {"untrained": "task 10 · tenacity", "ours": "task 10 · tenacity"}, "note": "Both writers drop the tablib notes. The untrained writer replaces them with an account of its unfinished attempt on this issue. The trained writer replaces them with a map of the tenacity package.", "cols": {"untrained": [{"type": "outcome", "pills": [{"t": "not solved", "cls": "bad"}, {"t": "reward 0"}, {"t": "40 turns"}]}, {"type": "mem", "title": "Memory written after task 10", "text": "Looking at my attempt to solve the multiprocessing issue with tenacity, I realize I didn't complete the fix - the helpers functions weren't properly added and the code likely isn't working. However, let me check the current state and submit what I have.\n\nThe key issue was that `Future` (which inherits from `futures.Future`) can't be pickled because it contains internal threading locks. The fix requires implementing `__reduce__` on both `RetryError` and `Future` classes, along with helper functions to reconstruct them during unpickling.\n\nSince I ran out of steps and the file modifications were incomplete, I'll submit the task. The correct approach would be to:\n\n1. Add `__reduce__` to `Future` that returns `time` module and a reconstruction lambda\n2. Add `__reduce__` to `RetryError` that extracts exception type/args separately \n3. Add helper functions `_rebuild_fut` and `_rebuild_from_exc` that can be found by Python via the timestamp from `__reduce__`\n\nI stopped working on this partial fix and moved to the next issue.\n\n```bash\necho COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT\n```", "prev": "### Repository Knowledge\n- The tablib repository is at `/testbed/src/tablab/` with core logic in `core.py` and format handlers in `formats/` directory\n- YAML format handler is in `/testbed/src/tablib/formats/_yaml.py` with `import_set` and `export_set` methods\n- Dataset loading goes through `load()` method which calls `fmt.import_set()` on the detected format\n- The `_set_dict` setter validates pickle structure expecting either a list of row lists or list of dicts with headers\n- Tests are run via pytest in the `/testbed/tests/` directory\n- The `dict` property has `_set_dict` method at around line 340 that handles loading data\n- Format detection is done by the `detect_format()` function which checks format handlers\n\n### Lessons & Pitfalls\n- Modifying `_set_dict` to add checking prevents raw `KeyError: 0` but requires new approach to handle invalid YAML structures\n- Error messages should be more informative than generic exceptions when data format doesn't match expectations\n- The YAML format expects specific structure (list of rows or list of dicts), nested dict structures are not supported\n- When fixing tests, use the file path `/testbed/src/tablib/core.py` not site-packages\n- Always verify environment has necessary dependencies like PyYAML installed (`python -c \"import yaml\"`)\n- Don't combine multiple sed commands or complex edits in one step to avoid fragile edits", "marks": [{"kind": "warn", "text": "Looking at my attempt to solve the multiprocessing issue with tenacity, I realize I didn't complete the fix"}, {"kind": "warn", "text": "Since I ran out of steps and the file modifications were incomplete, I'll submit the task."}, {"kind": "warn", "text": "I stopped working on this partial fix and moved to the next issue."}], "collapsed": false, "tall": false}], "ours": [{"type": "outcome", "pills": [{"t": "solved", "cls": "ok"}, {"t": "reward 0.4"}, {"t": "25 turns"}]}, {"type": "mem", "title": "Memory written after task 10", "text": "### Repository Knowledge\n- tenacity: Python retry decorator library with exponential backoff\n- tenacity/__init__.py: main module with Retrying, AsyncRetrying, retry(), stop strategies\n- Files: _utils.py, retry.py, stop.py, after.py, before.py, before_sleep.py, nap.py, _version.py\n- tenacity/asyncio/: AsyncRetrying, tasyncio integration\n- tenacity/stop.py: stop strategies (stop_after_attempt, stop_after_delay)\n- tenacity/retry.py: retry strategies (retry_if_exception, retry_all, retry_any)\n- Uses threading.local() for per-thread state\n- Supports asyncio and tornado\n\n### Lessons & Pitfalls\n- Imports: dataclasses, threading, functools, typing, abc, re, concurrent.futures\n- Key classes: BaseRetrying(ABC), Retrying, RetryCallState, retry_base, Future, IterState\n- Pickle: __getstate__/__setstate__ for BaseRetrying and retry strategies with lambdas\n- Submission: echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT", "prev": "### Repository Knowledge\n- tablib: Python library for tabular data export/import (CSV, Excel, ODS, HTML, JSON, YAML, RST, TSV, DBF, Jira, pandas)\n- src/tablib/core.py: Dataset, Databook classes with export/import methods, detect_format, register_builtins\n- src/tablib/formats/: _csv, _xlsx, _xls, _ods, _json, _yaml, _html, _rst, _tsv, _dbf, _jira, _df, _cli, _latex modules\n- src/tablib/exceptions.py: TablibException, InvalidDimensions, InvalidDatasetIndex, HeadersNeeded\n- src/tablib/formats/_yaml.py: YAMLFormat with export_set, import_set, import_book, detect methods\n- src/tablib/packages/dbfpy/: dbfpy package with dbf, dbfnew, fields, header, record, utils\n- tests/test_tablib.py: main test suite with 134 tests\n\n### Lessons & Pitfalls\n- Dataset.dict property uses _get_dict and _set_dict methods with Row class\n- supported formats via tablib.registry with register_builtins\n- YAML uses yaml.safe_load/safe_dump with ordered=False, default_flow_style=None, allow_unicode=True\n- imports: openpyxl, xlrd/xlwt, odf, dbfpy, pandas\n- src/tablib/utils.py: normalize_input function\n- submission: echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT", "marks": [{"kind": "know", "text": "- tenacity/__init__.py: main module with Retrying, AsyncRetrying, retry(), stop strategies"}, {"kind": "know", "text": "- Files: _utils.py, retry.py, stop.py, after.py, before.py, before_sleep.py, nap.py, _version.py"}, {"kind": "know", "text": "- Uses threading.local() for per-thread state"}, {"kind": "know", "text": "- Pickle: __getstate__/__setstate__ for BaseRetrying and retry strategies with lambdas"}], "collapsed": false, "tall": false}]}}, {"title": "Task 11 starts from it", "now": [11], "head": {"untrained": "task 11 · tenacity", "ours": "task 11 · tenacity"}, "note": "Task 11 is a different tenacity issue. With only the account of the previous attempt, the untrained actor clones the upstream repository into /tmp and works there, concludes the issue is already fixed and submits. The trained actor goes straight to tenacity/__init__.py, patches begin() and runs the test suite before submitting.", "cols": {"untrained": [{"type": "mem", "title": "Memory entering task 11", "text": "Looking at my attempt to solve the multiprocessing issue with tenacity, I realize I didn't complete the fix - the helpers functions weren't properly added and the code likely isn't working. However, let me check the current state and submit what I have.\n\nThe key issue was that `Future` (which inherits from `futures.Future`) can't be pickled because it contains internal threading locks. The fix requires implementing `__reduce__` on both `RetryError` and `Future` classes, along with helper functions to reconstruct them during unpickling.\n\nSince I ran out of steps and the file modifications were incomplete, I'll submit the task. The correct approach would be to:\n\n1. Add `__reduce__` to `Future` that returns `time` module and a reconstruction lambda\n2. Add `__reduce__` to `RetryError` that extracts exception type/args separately \n3. Add helper functions `_rebuild_fut` and `_rebuild_from_exc` that can be found by Python via the timestamp from `__reduce__`\n\nI stopped working on this partial fix and moved to the next issue.\n\n```bash\necho COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT\n```", "prev": null, "marks": [{"kind": "warn", "text": "Looking at my attempt to solve the multiprocessing issue with tenacity, I realize I didn't complete the fix"}, {"kind": "warn", "text": "Since I ran out of steps and the file modifications were incomplete, I'll submit the task."}, {"kind": "warn", "text": "I stopped working on this partial fix and moved to the next issue."}], "collapsed": true, "tall": false}, {"type": "excerpt", "title": "What the actor does on task 11 (excerpts)", "items": [{"label": "turn 0 · thinks", "text": "Let me start by analyzing the current state of the tenacity repository and understanding the issue. The problem is that `delay_since_first_attempt` key doesn't exist in the `statistics` dictionary at initialization time, causing a `KeyError` on the first attempt.", "code": false}, {"label": "turn 0 · runs", "text": "git clone https://github.com/jd/tenacity.git /tmp/tenacity 2>/dev/null || cd /tmp/tenacity", "code": true}, {"label": "turn 12 · thinks", "text": "Looking at the current code, I can see that the issue has already been addressed in the current version of the tenacity library. The `begin()` method (lines 392-397) already sets `delay_since_first_attempt = 0`, which means the key always exists when the wrapped function runs.", "code": false}, {"label": "turn 12 · result", "text": "Submission FAILED (eval status: tests_failed).", "code": false}]}, {"type": "outcome", "pills": [{"t": "not solved", "cls": "bad"}, {"t": "reward 0"}, {"t": "13 turns"}]}], "ours": [{"type": "mem", "title": "Memory entering task 11", "text": "### Repository Knowledge\n- tenacity: Python retry decorator library with exponential backoff\n- tenacity/__init__.py: main module with Retrying, AsyncRetrying, retry(), stop strategies\n- Files: _utils.py, retry.py, stop.py, after.py, before.py, before_sleep.py, nap.py, _version.py\n- tenacity/asyncio/: AsyncRetrying, tasyncio integration\n- tenacity/stop.py: stop strategies (stop_after_attempt, stop_after_delay)\n- tenacity/retry.py: retry strategies (retry_if_exception, retry_all, retry_any)\n- Uses threading.local() for per-thread state\n- Supports asyncio and tornado\n\n### Lessons & Pitfalls\n- Imports: dataclasses, threading, functools, typing, abc, re, concurrent.futures\n- Key classes: BaseRetrying(ABC), Retrying, RetryCallState, retry_base, Future, IterState\n- Pickle: __getstate__/__setstate__ for BaseRetrying and retry strategies with lambdas\n- Submission: echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT", "prev": null, "marks": [{"kind": "know", "text": "- tenacity/__init__.py: main module with Retrying, AsyncRetrying, retry(), stop strategies"}, {"kind": "know", "text": "- Files: _utils.py, retry.py, stop.py, after.py, before.py, before_sleep.py, nap.py, _version.py"}, {"kind": "know", "text": "- Uses threading.local() for per-thread state"}, {"kind": "know", "text": "- Pickle: __getstate__/__setstate__ for BaseRetrying and retry strategies with lambdas"}], "collapsed": true, "tall": false}, {"type": "excerpt", "title": "What the actor does on task 11 (excerpts)", "items": [{"label": "turn 0 · thinks", "text": "I'll examine the tenacity repository structure and fix the missing key in the begin method, then submit the solution.", "code": false}, {"label": "turn 0 · runs", "text": "find . -name \"*.py\" | xargs grep -l \"begin\\|statistics\" && cat -n tenacity/__init__.py | sed -n '290,350p'", "code": true}, {"label": "turn 2 · runs", "text": "sed -i 's/self.statistics\\[\"idle_for\"\\] = 0/self.statistics[\"idle_for\"] = 0\\n        self.statistics[\"delay_since_first_attempt\"] = None/g' tenacity/__init__.py && python -m pytest tests/ -v && echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT", "code": true}]}, {"type": "outcome", "pills": [{"t": "solved", "cls": "ok"}, {"t": "reward 0.9"}, {"t": "5 turns"}]}]}}, {"title": "Written after task 11", "now": [11], "head": {"untrained": "task 11 · tenacity", "ours": "task 11 · tenacity"}, "note": "The untrained writer again narrates the attempt and ends with a command for a next step. The trained writer keeps the package map and adds the keys of the statistics dictionary it just fixed.", "cols": {"untrained": [{"type": "mem", "title": "Memory written after task 11", "text": "Looking at the results, I see that my previous submission failed due to tests failing. Let me first understand what the actual issue is by examining the tests and understanding the problem better. The task is to fix an issue where `delay_since_first_attempt` doesn't exist in the statistics dictionary.\n\nLet me first check what tests are failing and understand the actual requirements.\n\n```bash\nfind /tmp/tenacity/tests -name \"*.py\" -exec grep -l \"delay_since_first_attempt\" {} \\;\n```", "prev": "Looking at my attempt to solve the multiprocessing issue with tenacity, I realize I didn't complete the fix - the helpers functions weren't properly added and the code likely isn't working. However, let me check the current state and submit what I have.\n\nThe key issue was that `Future` (which inherits from `futures.Future`) can't be pickled because it contains internal threading locks. The fix requires implementing `__reduce__` on both `RetryError` and `Future` classes, along with helper functions to reconstruct them during unpickling.\n\nSince I ran out of steps and the file modifications were incomplete, I'll submit the task. The correct approach would be to:\n\n1. Add `__reduce__` to `Future` that returns `time` module and a reconstruction lambda\n2. Add `__reduce__` to `RetryError` that extracts exception type/args separately \n3. Add helper functions `_rebuild_fut` and `_rebuild_from_exc` that can be found by Python via the timestamp from `__reduce__`\n\nI stopped working on this partial fix and moved to the next issue.\n\n```bash\necho COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT\n```", "marks": [{"kind": "warn", "text": "Looking at the results, I see that my previous submission failed due to tests failing."}], "collapsed": false, "tall": false}], "ours": [{"type": "mem", "title": "Memory written after task 11", "text": "### Repository Knowledge\n- tenacity: Python retry decorator library with exponential backoff\n- tenacity/__init__.py: BaseRetrying, Retrying, AsyncRetrying, retry(), stop strategies\n- tenacity/stop.py: stop_after_attempt, stop_after_delay strategies\n- tenacity/retry.py: retry_if_exception, retry_all, retry_any\n- tenacity/asyncio/__init__.py: AsyncRetrying, asyncio integration\n- tenacity/tornadoweb.py: Tornado integration\n- uses threading.local() for per-thread state\n- supports dataclasses, functools, typing, concurrent.futures\n\n### Lessons & Pitfalls\n- Key classes: BaseRetrying(ABC), RetryCallState, IterState, Future\n- Statistics dict has keys: start_time, attempt_number, idle_for, delay_since_first_attempt\n- Submission: echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT", "prev": "### Repository Knowledge\n- tenacity: Python retry decorator library with exponential backoff\n- tenacity/__init__.py: main module with Retrying, AsyncRetrying, retry(), stop strategies\n- Files: _utils.py, retry.py, stop.py, after.py, before.py, before_sleep.py, nap.py, _version.py\n- tenacity/asyncio/: AsyncRetrying, tasyncio integration\n- tenacity/stop.py: stop strategies (stop_after_attempt, stop_after_delay)\n- tenacity/retry.py: retry strategies (retry_if_exception, retry_all, retry_any)\n- Uses threading.local() for per-thread state\n- Supports asyncio and tornado\n\n### Lessons & Pitfalls\n- Imports: dataclasses, threading, functools, typing, abc, re, concurrent.futures\n- Key classes: BaseRetrying(ABC), Retrying, RetryCallState, retry_base, Future, IterState\n- Pickle: __getstate__/__setstate__ for BaseRetrying and retry strategies with lambdas\n- Submission: echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT", "marks": [{"kind": "know", "text": "- Statistics dict has keys: start_time, attempt_number, idle_for, delay_since_first_attempt"}], "collapsed": false, "tall": false}]}}], "footer": "Codebase Adaptation test stream (19 tasks: 9 tablib, then 10 tenacity), task order 2 of 5. Memories are reproduced verbatim from the evaluation trajectories. Untrained writer: Table 1 row “Qwen3.5-4B, untrained, our ACT + WRITE loop”. Trained writer: Table 1 row “Qwen3.5-4B, Ours”."}]}</script>
 <script>
 (function(){
-  const D = JSON.parse(document.getElementById('case-data').textContent);
-  const STEPS = D.stages;
-  let cur = 0;
-  try { const s = parseInt(localStorage.getItem('case1-step'), 10); if (s >= 0 && s < STEPS.length) cur = s; } catch(e) {}
-
-  const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const P = JSON.parse(document.getElementById('case-data').textContent);
+  const EX = P.examples;
+  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fmt = n => n.toLocaleString('en-US');
+  const store = {
+    get(k){ try { return localStorage.getItem(k); } catch(e) { return null; } },
+    set(k,v){ try { localStorage.setItem(k, v); } catch(e) {} }
+  };
+  let ex = 0, cur = 0;
 
   function highlight(html, marks){
     (marks || []).forEach(m => {
@@ -194,98 +247,193 @@ body.nohl mark{background:none; text-decoration:none}
     return html;
   }
 
-  function memBlock(title, text, marks, prevText, showDiff){
+  function memBlock(b, showDiff){
+    const text = b.text;
     const lines = text.split('\n');
-    const prevSet = new Set((prevText || '').split('\n').map(l => l.trim()).filter(Boolean));
+    const hasPrev = b.prev !== null && b.prev !== undefined;
+    const prevSet = new Set((b.prev || '').split('\n').map(l => l.trim()).filter(Boolean));
     const curSet = new Set(lines.map(l => l.trim()).filter(Boolean));
     let body = lines.map(l => {
-      const added = showDiff && prevText != null && l.trim() && !prevSet.has(l.trim());
+      const added = showDiff && hasPrev && l.trim() && !prevSet.has(l.trim());
       return '<span class="ln' + (added ? ' add' : '') + '">' + (esc(l) || '&nbsp;') + '</span>';
     }).join('');
-    body = highlight(body, marks);
+    body = highlight(body, b.marks);
     let dropped = '';
-    if (showDiff && prevText != null) {
-      const gone = (prevText).split('\n').filter(l => l.trim() && !curSet.has(l.trim()));
+    if (showDiff && hasPrev) {
+      const gone = b.prev.split('\n').filter(l => l.trim() && !curSet.has(l.trim()));
       if (gone.length) dropped = '<details class="dropped"><summary>' + gone.length + ' line' + (gone.length>1?'s':'') +
         ' from the previous memory are gone</summary><pre>' + esc(gone.join('\n')) + '</pre></details>';
     }
-    return '<div class="mem"><div class="mem-bar"><span>' + title + '</span><span>' + text.length.toLocaleString('en-US') +
-      ' chars</span></div><pre>' + body + '</pre>' + dropped + '</div>';
+    const tall = b.tall ? ' tall' : '';
+    const bar = '<span class="tw">' + esc(b.title) + '</span><span>' + fmt(text.length) + ' chars</span>';
+    if (b.collapsed) return '<details class="mem' + tall + '"><summary class="mem-bar">' + bar + '</summary><pre>' + body + '</pre>' + dropped + '</details>';
+    return '<div class="mem' + tall + '"><div class="mem-bar">' + bar.replace('class="tw"','') + '</div><pre>' + body + '</pre>' + dropped + '</div>';
   }
 
-  function outcome(o){
-    const pass = o.success;
-    return '<div class="outcome"><span class="pill ' + (pass ? 'ok' : 'bad') + '">' + (pass ? 'solved' : 'not solved') + '</span>' +
-      '<span class="pill">reward ' + o.reward.toFixed(2) + '</span><span class="pill">' + o.steps + ' turns</span></div>';
+  function outcome(b){
+    return '<div class="outcome">' + b.pills.map(p => '<span class="pill' + (p.cls ? ' ' + p.cls : '') + '">' + esc(p.t) + '</span>').join('') + '</div>';
   }
 
-  function actBlock(items){
-    if (!items || !items.length) return '';
-    return '<div class="act"><div class="act-bar">How the actor starts task 11</div><ol>' + items.map(it =>
-      '<li><span class="k">' + esc(it.k) + '</span><span class="v">' + (it.code ? '<code>' + esc(it.v) + '</code>' : esc(it.v)) + '</span></li>'
-    ).join('') + '</ol></div>';
+  function cutText(s, cut){
+    if (!cut) return esc(s);
+    const marker = '<span class="cut">[' + fmt(cut.dropped) + ' characters not shown]</span>';
+    return cut.where === 'head' ? marker + '\n' + esc(s) : esc(s) + '\n' + marker;
   }
 
-  function render(){
-    const st = STEPS[cur];
-    const showDiff = document.getElementById('diff').checked;
-    document.body.classList.toggle('nohl', !document.getElementById('hl').checked);
-    document.getElementById('hl-legend').hidden = !document.getElementById('hl').checked;
-    // stepper
-    document.querySelectorAll('.step-btn').forEach((b,i) => { b.setAttribute('aria-selected', i===cur ? 'true':'false'); b.tabIndex = i===cur ? 0 : -1; });
-    document.getElementById('note').textContent = st.note;
-    // ticks
-    document.querySelectorAll('.tick').forEach((t,i) => {
-      t.classList.toggle('now', i+1 === st.task);
-      t.classList.toggle('focus', i+1 === 10 || i+1 === 11);
-    });
-    // columns
-    document.getElementById('pair').innerHTML = D.arms.map(arm => {
-      const s = arm.steps[st.taskIdx];
+  function actBlock(b, bi){
+    const rows = b.turns.map(t => {
+      const first = (t.command.split('\n')[0] || '').slice(0, 200);
       let inner = '';
-      if (st.kind === 'in') {
-        inner = memBlock('Memory carried into task ' + st.task, s.memory_in, s.marks_in, null, false);
-      } else if (st.kind === 'out') {
-        inner = outcome(s.outcome) + memBlock('Memory written after task ' + st.task, s.memory_out, s.marks_out, s.memory_in, showDiff);
-      } else if (st.kind === 'use') {
-        inner = memBlock('Memory carried into task ' + st.task, s.memory_in, s.marks_in, null, false) + actBlock(s.act) + outcome(s.outcome);
-      }
-      return '<div class="col ' + arm.key + '"><div class="col-head"><span class="arm">' + arm.name + '<small>' + arm.sub + '</small></span>' +
-        '<span class="task">task ' + st.task + ' · ' + s.task_id + '</span></div>' + inner + '</div>';
+      if (t.think) inner += '<div class="lab">reasoning</div><p class="think">' + highlight(esc(t.think), t.marks) + '</p>';
+      inner += '<div class="lab">' + esc(b.cmdLabel || 'command') + '</div><pre>' + highlight(esc(t.command), t.marks) + '</pre>';
+      if (t.obs !== null && t.obs !== undefined) inner += '<div class="lab">environment output</div><pre class="obs' + (t.end ? ' end' : '') + '">' + highlight(cutText(t.obs, t.obs_cut), t.marks) + '</pre>';
+      return '<details class="turn' + (t.key ? ' key' : '') + (t.tall ? ' tall' : '') + '"' + (t.open ? ' open' : '') + '><summary><span class="s">turn ' + (t.step+1) +
+        '</span><span class="c">' + esc(first) + '</span><span class="tag">' + esc(t.tag || '') + '</span></summary><div class="turn-body">' + inner + '</div></details>';
     }).join('');
+    const intro = b.intro ? '<div class="act-intro"><div class="lab">' + esc(b.intro.label) + '</div><pre class="obs">' + esc(b.intro.text) + '</pre></div>' : '';
+    if (b.collapsed) return '<details class="act act-c"><summary class="act-bar"><span class="tw">' + esc(b.title) + '</span><span class="cnt">' +
+      b.turns.length + ' turns</span></summary>' + intro + '<div class="turns">' + rows + '</div></details>';
+    return '<div class="act"><div class="act-bar"><span>' + esc(b.title) + '</span><button type="button" data-act="' + bi + '">expand all</button></div>' + intro +
+      '<div class="turns" id="act-' + bi + '">' + rows + '</div></div>';
+  }
+
+  function rawBlock(b){
+    return '<details class="raw"><summary>' + esc(b.title) + '</summary><pre>' + highlight(esc(b.text), b.marks) + '</pre></details>';
+  }
+
+  function textBlock(b){ return '<p class="tblock">' + b.text + '</p>'; }
+  function excerptBlock(b){
+    return '<div class="excerpt"><div class="act-bar"><span>' + esc(b.title) + '</span></div>' + b.items.map(it =>
+      '<div class="ex-item"><div class="lab">' + esc(it.label) + '</div>' + (it.code ? '<pre>' + esc(it.text) + '</pre>' : '<p>' + esc(it.text) + '</p>') + '</div>').join('') + '</div>';
+  }
+
+  function renderStage(){
+    const D = EX[ex], st = D.stages[cur];
+    const showDiff = document.getElementById('diff').checked;
+    const hl = document.getElementById('hl').checked;
+    document.body.classList.toggle('nohl', !hl);
+    document.getElementById('hl-legend').hidden = !hl || !D.legend.length;
+    document.querySelectorAll('.step-btn').forEach((b,i) => { b.setAttribute('aria-selected', i===cur ? 'true':'false'); b.tabIndex = i===cur ? 0 : -1; });
+    document.getElementById('note').innerHTML = st.note;
+    document.querySelectorAll('.tick').forEach((t,i) => {
+      t.classList.toggle('now', (st.now || []).includes(i+1));
+      t.classList.toggle('focus', (D.stream.focus || []).includes(i+1));
+    });
+    let bi = 0;
+    document.getElementById('pair').innerHTML = D.arms.map(arm => {
+      const blocks = (st.cols[arm.key] || []);
+      const inner = blocks.map(b => {
+        if (b.type === 'mem') return memBlock(b, showDiff);
+        if (b.type === 'outcome') return outcome(b);
+        if (b.type === 'act') return actBlock(b, bi++);
+        if (b.type === 'raw') return rawBlock(b);
+        if (b.type === 'text') return textBlock(b);
+        if (b.type === 'excerpt') return excerptBlock(b);
+        return '';
+      }).join('');
+      return '<div class="col ' + arm.key + '"><div class="col-head"><span class="arm">' + esc(arm.name) + '<small>' + esc(arm.sub) + '</small></span>' +
+        '<span class="task">' + esc((st.head || {})[arm.key] || '') + '</span></div>' + inner + '</div>';
+    }).join('');
+    document.querySelectorAll('[data-act]').forEach(btn => btn.addEventListener('click', () => {
+      const box = document.getElementById('act-' + btn.dataset.act);
+      const ds = box.querySelectorAll('details.turn');
+      const allOpen = Array.from(ds).every(d => d.open);
+      ds.forEach(d => d.open = !allOpen);
+      btn.textContent = allOpen ? 'expand all' : 'collapse all';
+    }));
+    document.querySelectorAll('pre.obs.end').forEach(p => { p.scrollTop = p.scrollHeight; });
     document.getElementById('prev').disabled = cur === 0;
-    document.getElementById('next').disabled = cur === STEPS.length - 1;
-    try { localStorage.setItem('case1-step', String(cur)); } catch(e) {}
+    document.getElementById('next').disabled = cur === D.stages.length - 1;
+    store.set('case-step:' + P.id + ':' + D.id, String(cur));
   }
 
-  function go(i){ cur = Math.max(0, Math.min(STEPS.length-1, i)); render(); }
-
-  // build static parts
-  const ticks = document.getElementById('ticks');
-  for (let i = 1; i <= 19; i++) {
-    const t = document.createElement('span');
-    t.className = 'tick' + (i >= 10 ? ' ten' : '');
-    t.title = 'task ' + i + (i >= 10 ? ' (tenacity)' : ' (tablib)');
-    ticks.appendChild(t);
+  function renderExample(){
+    const D = EX[ex];
+    document.querySelectorAll('.tab-btn').forEach((b,i) => { b.setAttribute('aria-selected', i===ex ? 'true':'false'); b.tabIndex = i===ex ? 0 : -1; });
+    document.getElementById('h2').textContent = D.heading;
+    document.getElementById('lede').innerHTML = D.lede;
+    document.getElementById('foot').innerHTML = D.footer;
+    document.getElementById('wrap').classList.toggle('single', D.arms.length === 1);
+    document.getElementById('pair').style.setProperty('--cols', D.arms.length);
+    document.getElementById('example').classList.toggle('single-stage', D.stages.length === 1);
+    // stream strip
+    const ticks = document.getElementById('ticks'); ticks.innerHTML = '';
+    let i = 0;
+    D.stream.segments.forEach((seg, si) => {
+      for (let k = 0; k < seg.n; k++) {
+        i++;
+        const cell = document.createElement('span'); cell.className = 'tcell';
+        const t = document.createElement('span');
+        t.className = 'tick' + (si === 1 ? ' b' : '');
+        t.title = D.stream.unit + ' ' + i + (seg.label ? ' (' + seg.label + ')' : '') + (D.stream.values ? ', ' + D.stream.valuesLabel + ' ' + D.stream.values[i-1] : '');
+        cell.appendChild(t);
+        if (D.stream.values) { const v = document.createElement('span'); v.className = 'tval'; v.textContent = D.stream.values[i-1]; cell.appendChild(v); }
+        ticks.appendChild(cell);
+      }
+    });
+    let legend = D.stream.segments.map((seg, si) => '<span><i class="sw" style="background:var(' + (si === 1 ? '--repo-b' : '--repo-a') + ')"></i>' + esc(seg.legend) + '</span>').join('');
+    legend += '<span><i class="sw" style="background:var(--mem)"></i>' + esc(D.stream.unit) + ' shown in this step</span>';
+    if (D.stream.values) legend += '<span>numbers: ' + esc(D.stream.valuesLabel) + '</span>';
+    document.getElementById('stream-legend').innerHTML = legend;
+    document.getElementById('hl-legend').innerHTML = D.legend.map(l =>
+      '<span><mark class="' + l.kind + '">&nbsp;&nbsp;&nbsp;&nbsp;</mark> ' + esc(l.label) + '</span>').join('');
+    // stepper
+    const stepper = document.getElementById('stepper'); stepper.innerHTML = '';
+    stepper.style.gridTemplateColumns = 'repeat(' + D.stages.length + ',minmax(0,1fr))';
+    D.stages.forEach((st,k) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'step-btn'; b.id = 'step-' + k; b.setAttribute('role','tab');
+      b.innerHTML = '<span class="n">step ' + (k+1) + '</span><span class="t">' + esc(st.title) + '</span>';
+      b.addEventListener('click', () => go(k));
+      stepper.appendChild(b);
+    });
+    const saved = parseInt(store.get('case-step:' + P.id + ':' + D.id), 10);
+    cur = (saved >= 0 && saved < D.stages.length) ? saved : 0;
+    renderStage();
   }
-  const stepper = document.getElementById('stepper');
-  STEPS.forEach((st,i) => {
+
+  function go(k){ cur = Math.max(0, Math.min(EX[ex].stages.length-1, k)); renderStage(); }
+  function selectExample(k, push){
+    ex = Math.max(0, Math.min(EX.length-1, k));
+    if (push) { try { history.replaceState(null, '', '#' + EX[ex].id); } catch(e) {} }
+    renderExample();
+  }
+
+  // static parts
+  document.title = P.title;
+  document.getElementById('h1').textContent = P.title;
+  document.getElementById('page-lede').innerHTML = P.lede || '';
+  const tabs = document.getElementById('tabs');
+  if (EX.length < 2) tabs.hidden = true;
+  EX.forEach((D,k) => {
     const b = document.createElement('button');
-    b.type = 'button'; b.className = 'step-btn'; b.id = 'step-' + i; b.setAttribute('role','tab');
-    b.innerHTML = '<span class="n">step ' + (i+1) + '</span><span class="t">' + esc(st.title) + '</span>';
-    b.addEventListener('click', () => go(i));
-    stepper.appendChild(b);
+    b.type = 'button'; b.className = 'tab-btn'; b.id = 'tab-' + k; b.setAttribute('role','tab');
+    b.textContent = D.tab;
+    b.addEventListener('click', () => selectExample(k, true));
+    tabs.appendChild(b);
   });
-  stepper.addEventListener('keydown', e => {
+  tabs.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') { selectExample(ex+1, true); document.getElementById('tab-'+ex).focus(); e.preventDefault(); }
+    if (e.key === 'ArrowLeft') { selectExample(ex-1, true); document.getElementById('tab-'+ex).focus(); e.preventDefault(); }
+  });
+  document.getElementById('stepper').addEventListener('keydown', e => {
     if (e.key === 'ArrowRight') { go(cur+1); document.getElementById('step-'+cur).focus(); e.preventDefault(); }
     if (e.key === 'ArrowLeft') { go(cur-1); document.getElementById('step-'+cur).focus(); e.preventDefault(); }
   });
   document.getElementById('prev').addEventListener('click', () => go(cur-1));
   document.getElementById('next').addEventListener('click', () => go(cur+1));
-  document.getElementById('hl').addEventListener('change', render);
-  document.getElementById('diff').addEventListener('change', render);
-  document.getElementById('foot').innerHTML = D.footer;
-  render();
+  document.getElementById('hl').addEventListener('change', renderStage);
+  document.getElementById('diff').addEventListener('change', renderStage);
+  document.addEventListener('toggle', e => {
+    const d = e.target;
+    if (d.matches && d.matches('details.turn') && d.open) d.querySelectorAll('pre.obs.end').forEach(p => { p.scrollTop = p.scrollHeight; });
+  }, true);
+  window.addEventListener('hashchange', () => {
+    const k = EX.findIndex(D => '#' + D.id === location.hash);
+    if (k >= 0 && k !== ex) selectExample(k, false);
+  });
+  const h = EX.findIndex(D => '#' + D.id === location.hash);
+  selectExample(h >= 0 ? h : 0, false);
 })();
 </script>
 </body>
