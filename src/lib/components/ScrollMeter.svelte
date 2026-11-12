@@ -8,6 +8,8 @@
   export let headingsSelector = 'h2, h3';
   /** Max width for the TOC column (px) */
   export let tocMaxWidthCap = 320;
+  /** Min width for the TOC column (px); the text column moves right to make room */
+  export let tocMinWidth = 260;
 
   type Heading = {
     id: string;
@@ -70,6 +72,15 @@
     const root = document.documentElement;
     const v = `${Math.max(0, Math.round(px))}px`;
     root.style.setProperty("--md-main-col", v);
+  }
+
+  /** Reserve the TOC's horizontal space in the page grid (px from the viewport's left edge). */
+  function publishTocReserve(px: number) {
+    if (!browser) return;
+    const grid = container_el?.closest(".md-grid") as HTMLElement | null;
+    const gridLeft = grid ? Math.max(0, grid.getBoundingClientRect().left) : 0;
+    const v = hideToc ? 0 : Math.max(0, Math.round(px - gridLeft));
+    document.documentElement.style.setProperty("--toc-reserve", `${v}px`);
   }
 
   function publishSideCols(side: "on" | "off") {
@@ -273,6 +284,7 @@
     }
 
     hideToc = hideByWidth;
+    if (hideToc) publishTocReserve(0);
 
     // Publish a single source of truth for "side columns on/off" so footnotes can
     // bind to the TOC visibility.
@@ -384,14 +396,18 @@
     const available = Math.max(0, Math.floor(leftMargin - gap));
     const capVar = getComputedStyle(document.documentElement).getPropertyValue("--toc-max-width-cap");
     const cap = Math.max(0, Math.round(parseFloat(capVar || "320") || 320));
-    const maxWidth = available > 0 ? Math.min(contentWidth, available) : contentWidth;
-    meterEl.style.setProperty("--toc-max-width", `${Math.min(maxWidth, cap)}px`);
+    // Never narrower than tocMinWidth (unless every label is shorter); on wide
+    // screens grow into the free left margin, up to the cap.
+    const fromMargin = available > 0 ? Math.min(contentWidth, available) : contentWidth;
+    const tocW = Math.min(cap, Math.max(Math.min(contentWidth, tocMinWidth), fromMargin));
+    meterEl.style.setProperty("--toc-max-width", `${tocW}px`);
 
     // Keep TOC pinned to the left edge (no "hugging" movement).
     meterEl.style.setProperty("--toc-left", `${minLeft}px`);
 
     // Cache for scroll-time updates.
-    lastTocWidth = Math.min(maxWidth, cap);
+    lastTocWidth = tocW;
+    publishTocReserve(minLeft + tocW);
     lastTocGap = gap;
     lastTocMinLeft = minLeft;
 
