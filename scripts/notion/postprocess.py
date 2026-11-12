@@ -87,6 +87,23 @@ def runin(m):
 post, n = re.subn(rf'(?m)^(\s*(?:[-*] )?)(\*\*\*|\*\*)({LABEL})\2', runin, post)
 print('run-in labels marked:', n)
 
+# --- 2b. passages to highlight (scripts/notion/highlight.txt) ---------------------------
+import os
+hl_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'highlight.txt')
+if os.path.exists(hl_path):
+    for passage in (l.strip() for l in open(hl_path)):
+        if not passage or passage.startswith('#'):
+            continue
+        # match the passage even if Notion bolded only part of it (** markers anywhere)
+        words = [re.escape(w) for w in passage.split()]
+        pat = r'(?:\*\*)?' + r'(?:\*\*)?\s+(?:\*\*)?'.join(words) + r'(?:\*\*)?'
+        m = re.search(pat, post)
+        if not m:
+            print('WARNING: highlight passage not found:', passage[:60])
+            continue
+        post = post[:m.start()] + '**' + m.group(0).replace('**', '') + '**' + post[m.end():]
+        print('highlighted:', passage[:60])
+
 # --- 3. headings ----------------------------------------------------------------------
 post, n = re.subn(r'(?m)^#### ', '### ', post)
 print('#### -> ###:', n)

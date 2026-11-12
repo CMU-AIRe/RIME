@@ -1,0 +1,4 @@
+# One passage per line (plain text, as it reads on the page). postprocess.py makes each
+# whole passage bold, so it is shown in the highlight colour (Carnegie Red) even if Notion
+# only bolds part of it. Lines starting with # are ignored.
+Our key finding is that training the writer alone for memory writing is not enough. We also need to train the actor to explore in ways that produce useful information for future tasks.
