@@ -307,7 +307,7 @@ Several natural follow-up questions remain. How far can learned memory-writing s
 
 ## Acknowledgements
 
-We thank Anikait Singh, Apurva Gandhi, Violet Xiang and Hao Bai for helpful discussions and feedback on an earlier version of this post. We thank the CMU FLAME center for providing the GPU resources that supported this work.
+We thank Anikait Singh, Apurva Gandhi, Violet Xiang and Hao Bai for helpful discussions and feedback on an earlier version of this post. We also thank Prof. Naoki Okazaki and Prof. Rio Yokota for their support. We thank the CMU FLAME center for providing the GPU resources that supported this work.
 
 ## Appendices: Case Studies
 
